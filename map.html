@@ -44,7 +44,7 @@ html, body { height: 100%; overflow: hidden; font-family: 'Fraunces', Georgia, s
   border: 3px solid #D8E2DC;
 }
 #map-container.panel-open { left: var(--panel-width); }
-#map-container svg { width: 100%; height: 100%; display: block; }
+#map-container svg { width: 100%; height: 100%; display: block; shape-rendering: geometricPrecision; text-rendering: optimizeLegibility; }
 .district-path {
   stroke: rgba(0,0,0,0.2);
   stroke-width: 0.8px;
@@ -59,7 +59,6 @@ html, body { height: 100%; overflow: hidden; font-family: 'Fraunces', Georgia, s
 .district-path.selected {
   stroke: var(--primary);
   stroke-width: 2.5px;
-  filter: drop-shadow(0 0 4px rgba(34,139,34,0.3));
 }
 .connection-line {
   fill: none;
@@ -74,7 +73,7 @@ html, body { height: 100%; overflow: hidden; font-family: 'Fraunces', Georgia, s
   pointer-events: none;
 }
 .node-group { cursor: pointer; }
-.node-group:hover .node-shape { filter: brightness(1.15); }
+.node-group:hover .node-shape { filter: none; }
 .node-label {
   font-family: 'Fraunces', Georgia, serif;
   font-size: 9px;
