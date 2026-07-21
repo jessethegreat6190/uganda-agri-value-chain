@@ -571,9 +571,225 @@ html, body { height: 100%; overflow: hidden; font-family: 'Fraunces', Georgia, s
   .map-title-overlay { font-size: 11px; padding: 8px 16px; bottom: 12px; }
   .regions-panel { width: 100%; }
 }
+/* ─── WELCOME OVERLAY ──────────────────────────────────────────────── */
+.welcome-overlay {
+  position: fixed; inset: 0; z-index: 10000;
+  background: rgba(27,67,50,0.65);
+  backdrop-filter: blur(6px);
+  display: flex; align-items: center; justify-content: center;
+  opacity: 1; transition: opacity 0.4s ease;
+}
+.welcome-overlay.hidden { opacity: 0; pointer-events: none; }
+.welcome-card {
+  background: var(--surface);
+  border-radius: 16px;
+  padding: 40px 44px;
+  max-width: 520px; width: 90%;
+  box-shadow: 0 20px 60px rgba(27,67,50,0.25);
+  text-align: center;
+  font-family: 'Fraunces', Georgia, serif;
+}
+.welcome-card h1 {
+  font-size: 24px; font-weight: 800;
+  color: var(--text);
+  margin-bottom: 6px;
+  line-height: 1.2;
+}
+.welcome-card .subtitle {
+  font-size: 13px; color: var(--text-secondary);
+  margin-bottom: 28px;
+  line-height: 1.5;
+}
+.welcome-steps {
+  display: flex; gap: 16px;
+  margin-bottom: 28px;
+  text-align: left;
+}
+.welcome-step {
+  flex: 1;
+  background: var(--bg);
+  border-radius: 12px;
+  padding: 16px 14px;
+  border: 1px solid var(--border);
+}
+.welcome-step-num {
+  width: 28px; height: 28px;
+  background: var(--primary);
+  color: #fff;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 700;
+  margin-bottom: 10px;
+}
+.welcome-step h3 {
+  font-size: 13px; font-weight: 700;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+.welcome-step p {
+  font-size: 11px; color: var(--text-secondary);
+  line-height: 1.4;
+  font-family: 'Fraunces', Georgia, serif;
+}
+.welcome-btn {
+  background: var(--primary);
+  color: #fff;
+  border: none;
+  padding: 12px 36px;
+  border-radius: 10px;
+  font-size: 15px; font-weight: 700;
+  cursor: pointer;
+  font-family: 'Fraunces', Georgia, serif;
+  transition: background 0.2s;
+  letter-spacing: 0.3px;
+}
+.welcome-btn:hover { background: var(--primary-dark); }
+.welcome-sources {
+  margin-top: 18px;
+  font-size: 10px; color: var(--text-dim);
+  letter-spacing: 0.3px;
+}
+
+/* ─── GETTING STARTED PANEL ────────────────────────────────────────── */
+.getting-started {
+  background: linear-gradient(135deg, #f0f7f0, #e8f0e8);
+  border: 1px solid #c8dcc8;
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  margin-bottom: 12px;
+  cursor: pointer;
+  transition: padding 0.2s;
+}
+.getting-started.collapsed .gs-step { display: none; }
+.getting-started.collapsed { padding: 10px 16px; }
+.getting-started h4 {
+  font-size: 12px; font-weight: 700;
+  color: var(--primary-dark);
+  margin-bottom: 10px;
+  display: flex; align-items: center; gap: 6px;
+}
+.getting-started.collapsed h4 { margin-bottom: 0; }
+.getting-started h4 .collapse-arrow {
+  margin-left: auto;
+  font-size: 10px;
+  color: var(--text-dim);
+  transition: transform 0.2s;
+}
+.getting-started.collapsed h4 .collapse-arrow { transform: rotate(-90deg); }
+.gs-step {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 6px 0;
+}
+.gs-step-num {
+  width: 20px; height: 20px;
+  background: var(--primary);
+  color: #fff;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px; font-weight: 700;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+.gs-step-text {
+  font-size: 12px; color: var(--text-secondary);
+  line-height: 1.5;
+}
+.gs-step-text strong { color: var(--text); }
+
+/* ─── TRUST BAR ───────────────────────────────────────────────────── */
+.trust-bar {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  z-index: 998;
+  background: rgba(255,255,255,0.92);
+  backdrop-filter: blur(8px);
+  border-top: 1px solid var(--border);
+  padding: 8px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  font-size: 10px;
+  color: var(--text-dim);
+  transition: transform 0.3s ease;
+}
+.trust-bar.hidden { transform: translateY(100%); }
+.trust-bar-item {
+  display: flex; align-items: center; gap: 5px;
+}
+.trust-dot {
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: var(--primary);
+}
+.trust-bar a {
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.15s;
+}
+.trust-bar a:hover { color: var(--primary); }
+
+/* ─── MAP HINT PULSE ──────────────────────────────────────────────── */
+.map-hint {
+  position: absolute;
+  bottom: 48px; left: 50%;
+  transform: translateX(-50%);
+  z-index: 997;
+  background: rgba(255,255,255,0.95);
+  backdrop-filter: blur(6px);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 8px 18px;
+  font-size: 12px; font-weight: 500;
+  color: var(--text-secondary);
+  display: flex; align-items: center; gap: 8px;
+  box-shadow: var(--shadow-md);
+  transition: opacity 0.4s;
+  pointer-events: none;
+}
+.map-hint.hidden { opacity: 0; }
+.map-hint-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--primary);
+  animation: hint-pulse 2s ease-in-out infinite;
+}
+@keyframes hint-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(1.5); }
+}
+
 </style>
 </head>
 <body>
+
+<!-- WELCOME OVERLAY -->
+<div class="welcome-overlay" id="welcome-overlay">
+  <div class="welcome-card">
+    <h1>Uganda AgriValue Chain</h1>
+    <div class="subtitle">Interactive district map of agricultural cooperatives, warehouses, markets, and traders across Uganda</div>
+    <div class="welcome-steps">
+      <div class="welcome-step">
+        <div class="welcome-step-num">1</div>
+        <h3>Toggle Layers</h3>
+        <p>Use the left panel to show or hide producers, warehouses, markets, and more</p>
+      </div>
+      <div class="welcome-step">
+        <div class="welcome-step-num">2</div>
+        <h3>Click a Node</h3>
+        <p>Click any dot on the map to see details and trace its value-chain pathway</p>
+      </div>
+      <div class="welcome-step">
+        <div class="welcome-step-num">3</div>
+        <h3>Follow the Chain</h3>
+        <p>Connections light up showing how goods flow from farmer to market</p>
+      </div>
+    </div>
+    <button class="welcome-btn" onclick="dismissWelcome()">Explore the Map</button>
+    <div class="welcome-sources">Data verified from UCDA, ESAFF, AFEX, Farmgain Africa, UWRSA &middot; July 2026</div>
+  </div>
+</div>
 
 <!-- TOP BAR -->
 <div class="topbar">
@@ -605,6 +821,21 @@ html, body { height: 100%; overflow: hidden; font-family: 'Fraunces', Georgia, s
 <!-- PANEL -->
 <div class="panel open" id="panel">
   <div class="panel-scroll">
+    <div class="getting-started" id="getting-started" onclick="this.classList.toggle('collapsed')">
+      <h4><span style="font-size:14px;">&#9654;</span> How to use this map <span class="collapse-arrow">&#9660;</span></h4>
+      <div class="gs-step">
+        <div class="gs-step-num">1</div>
+        <div class="gs-step-text"><strong>Toggle layers</strong> on/off using the checkboxes below to focus on what matters</div>
+      </div>
+      <div class="gs-step">
+        <div class="gs-step-num">2</div>
+        <div class="gs-step-text"><strong>Click any dot</strong> on the map to see its details, connections, and supply chain</div>
+      </div>
+      <div class="gs-step">
+        <div class="gs-step-num">3</div>
+        <div class="gs-step-text"><strong>Follow the lines</strong> to trace how goods flow from farmer to buyer</div>
+      </div>
+    </div>
     <div class="panel-section">
       <div class="panel-section-header"><h3>Map Layers</h3><p>Toggle data layers on and off</p></div>
       <div class="panel-section-body"><div class="layer-list" id="layer-toggles"></div></div>
@@ -671,7 +902,59 @@ html, body { height: 100%; overflow: hidden; font-family: 'Fraunces', Georgia, s
 
 <div class="sample-badge">VERIFIED DATA</div>
 
+<!-- TRUST BAR -->
+<div class="trust-bar" id="trust-bar">
+  <div class="trust-bar-item"><div class="trust-dot"></div> UCDA</div>
+  <div class="trust-bar-item"><div class="trust-dot"></div> ESAFF Uganda</div>
+  <div class="trust-bar-item"><div class="trust-dot"></div> AFEX</div>
+  <div class="trust-bar-item"><div class="trust-dot"></div> Farmgain Africa</div>
+  <div class="trust-bar-item"><div class="trust-dot"></div> UWRSA</div>
+  <div class="trust-bar-item" style="margin-left:8px;border-left:1px solid var(--border);padding-left:12px;">July 2026</div>
+</div>
+
+<!-- MAP HINT -->
+<div class="map-hint" id="map-hint">
+  <div class="map-hint-dot"></div>
+  Click any dot on the map to explore its value chain
+</div>
+
 <script>
+// ─── WELCOME OVERLAY ─────────────────────────────────────────────────
+function dismissWelcome() {
+  const overlay = document.getElementById('welcome-overlay');
+  overlay.classList.add('hidden');
+  setTimeout(() => overlay.style.display = 'none', 400);
+  localStorage.setItem('agrivalue_welcomed', '1');
+}
+
+function checkWelcome() {
+  if (localStorage.getItem('agrivalue_welcomed')) {
+    document.getElementById('welcome-overlay').style.display = 'none';
+  }
+}
+
+function hideMapHint() {
+  const hint = document.getElementById('map-hint');
+  if (hint) hint.classList.add('hidden');
+}
+
+function showMapHint() {
+  const hint = document.getElementById('map-hint');
+  if (hint && !localStorage.getItem('agrivalue_hint_dismissed')) {
+    hint.classList.remove('hidden');
+  }
+}
+
+// Hide hint after 8 seconds or first click, collapse getting started guide
+setTimeout(hideMapHint, 8000);
+document.addEventListener('click', function hideHintOnce(e) {
+  hideMapHint();
+  localStorage.setItem('agrivalue_hint_dismissed', '1');
+  const gs = document.getElementById('getting-started');
+  if (gs && !gs.classList.contains('collapsed')) gs.classList.add('collapsed');
+  document.removeEventListener('click', hideHintOnce);
+}, { once: true });
+
 // ─── DATA ──────────────────────────────────────────────────────────────
 
 const LAYER_CONFIG = [
@@ -1880,6 +2163,7 @@ function zoomToRegion(region) {
 
 // ─── INIT ──────────────────────────────────────────────────────────────
 
+checkWelcome();
 setupSVG();
 
 d3.json('https://raw.githubusercontent.com/has2k1/uganda-boundaries/main/geojson/districts.geojson')
