@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Producer-to-Primary Market Linkage Module</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<style>
+:root {
+  --green-dark: #1a3c34;
+  --green: #2d6a4f;
+  --green-light: #40916c;
+  --green-muted: #52b788;
+  --green-pale: #d8f3dc;
+  --blue-dark: #1b2838;
+  --blue: #2c4a6e;
+  --gold: #d4a746;
+  --cream: #faf8f2;
+  --white: #ffffff;
+  --text-dark: #1a2a1f;
+  --text-muted: #5a6b5e;
+  --radius: 12px;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; font-size: 16px; }
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  color: var(--text-dark);
+  background: var(--cream);
+  line-height: 1.6;
+}
+
+header {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+  background: rgba(27, 40, 56, 0.97);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.header-inner {
+  max-width: 1200px; margin: 0 auto; padding: 0 2rem;
+  height: 64px; display: flex; align-items: center; justify-content: space-between;
+}
+.logo { display: flex; align-items: center; gap: 0.75rem; text-decoration: none; }
+.logo-icon {
+  width: 32px; height: 32px;
+  background: var(--green-muted); border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--white); font-weight: 700; font-size: 1rem;
+}
+.logo-text { color: var(--white); font-size: 0.82rem; font-weight: 500; }
+.logo-text strong { display: block; font-size: 0.9rem; font-weight: 700; letter-spacing: 0.04em; }
+nav a {
+  color: rgba(255,255,255,0.65); text-decoration: none;
+  font-size: 0.75rem; font-weight: 500; letter-spacing: 0.03em;
+  margin-left: 1.5rem; transition: color 0.3s;
+}
+nav a:hover { color: var(--white); }
+
+/* ─── Hero ─── */
+.hero {
+  min-height: 60vh; display: flex; align-items: center; justify-content: center;
+  background: linear-gradient(160deg, var(--blue-dark) 0%, var(--green-dark) 100%);
+  padding: 6rem 2rem 3rem; text-align: center;
+}
+.hero h1 {
+  font-size: 2.4rem; font-weight: 700; color: var(--white);
+  line-height: 1.2; margin-bottom: 0.75rem;
+}
+.hero h1 span { color: var(--green-muted); }
+.hero p {
+  font-size: 1rem; color: rgba(255,255,255,0.55);
+  max-width: 700px; margin: 0 auto; font-weight: 300; line-height: 1.7;
+}
+.hero-badge {
+  display: inline-block; padding: 0.35rem 1rem;
+  border: 1px solid rgba(82,183,136,0.3); border-radius: 100px;
+  color: var(--green-muted); font-size: 0.7rem; font-weight: 500;
+  letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 1rem;
+}
+
+.section { padding: 4rem 2rem; max-width: 1100px; margin: 0 auto; }
+.section-label {
+  font-size: 0.68rem; font-weight: 600; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--green-light); margin-bottom: 0.4rem;
+}
+.section-title {
+  font-size: 1.6rem; font-weight: 700; color: var(--text-dark);
+  margin-bottom: 0.5rem; line-height: 1.25;
+}
+.section-sub {
+  font-size: 0.9rem; color: var(--text-muted); font-weight: 300;
+  max-width: 640px; margin-bottom: 2rem; line-height: 1.7;
+}
+.bg-white { background: var(--white); }
+
+/* ─── Flow Diagram ─── */
+.chain-flow {
+  display: flex; align-items: center; justify-content: center;
+  flex-wrap: wrap; gap: 0.4rem;
+}
+.chain-node {
+  background: var(--white); border: 1px solid #e0e8e0;
+  border-radius: 10px; padding: 0.8rem 1.2rem;
+  text-align: center; min-width: 110px; transition: all 0.3s;
+}
+.chain-node:hover { border-color: var(--green-muted); box-shadow: 0 4px 16px rgba(45,106,79,0.06); }
+.chain-node-icon { font-size: 1.3rem; }
+.chain-node-label { font-size: 0.72rem; font-weight: 600; color: var(--text-dark); margin-top: 0.2rem; }
+.chain-arrow { color: var(--green-muted); font-size: 1rem; }
+
+/* ─── Content Cards ─── */
+.content-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+.content-card {
+  background: var(--white); border: 1px solid #e8eee8;
+  border-radius: var(--radius); padding: 1.5rem;
+}
+.content-card h4 {
+  font-size: 0.9rem; font-weight: 600; color: var(--green-dark);
+  margin-bottom: 0.8rem; display: flex; align-items: center; gap: 0.5rem;
+}
+.content-card ul { list-style: none; padding: 0; }
+.content-card li {
+  padding: 0.35rem 0; font-size: 0.82rem; color: var(--text-muted);
+  border-bottom: 1px solid #f0f4f0; display: flex; align-items: center; gap: 0.5rem;
+}
+.content-card li:last-child { border-bottom: none; }
+.content-card li strong { color: var(--text-dark); font-weight: 500; }
+
+/* ─── Actor Grid ─── */
+.actor-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
+.actor-card {
+  background: var(--white); border: 1px solid #e8eee8;
+  border-radius: var(--radius); padding: 1.2rem;
+  border-top: 3px solid var(--green-muted);
+}
+.actor-card h4 { font-size: 0.85rem; font-weight: 600; color: var(--green-dark); margin-bottom: 0.3rem; }
+.actor-card p { font-size: 0.75rem; color: var(--text-muted); line-height: 1.5; }
+
+/* ─── Architecture ─── */
+.arch-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.8rem; }
+.arch-card {
+  background: var(--white); border: 1px solid #e0e8e0;
+  border-radius: 8px; padding: 1rem; text-align: center;
+}
+.arch-card .icon { font-size: 1.3rem; margin-bottom: 0.3rem; }
+.arch-card h4 { font-size: 0.78rem; font-weight: 600; color: var(--text-dark); }
+.arch-card p { font-size: 0.68rem; color: var(--text-muted); margin-top: 0.2rem; }
+.arch-flow { text-align: center; color: var(--green-muted); font-size: 0.85rem; padding: 0.2rem 0; }
+
+/* ─── Integration Grid ─── */
+.integration-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
+.int-card {
+  background: var(--white); border: 1px solid #e8eee8;
+  border-radius: var(--radius); padding: 1.2rem;
+  border-left: 3px solid var(--gold);
+}
+.int-card h4 { font-size: 0.82rem; font-weight: 600; color: var(--text-dark); }
+.int-card p { font-size: 0.72rem; color: var(--text-muted); margin-top: 0.2rem; line-height: 1.5; }
+
+/* ─── Map ─── */
+.map-section { display: grid; grid-template-columns: 1fr 340px; gap: 1.5rem; align-items: start; }
+.map-legend { padding: 1rem; }
+.map-legend h4 { font-size: 0.9rem; font-weight: 600; margin-bottom: 0.8rem; }
+.legend-item { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.4rem; font-size: 0.8rem; color: var(--text-muted); }
+.legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+
+/* ─── Data Table ─── */
+.data-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+.data-table th {
+  text-align: left; padding: 0.6rem 0.8rem;
+  background: var(--green-dark); color: var(--white); font-weight: 600; font-size: 0.72rem;
+  letter-spacing: 0.05em; text-transform: uppercase;
+}
+.data-table td { padding: 0.6rem 0.8rem; border-bottom: 1px solid #e8eee8; color: var(--text-muted); }
+.data-table td strong { color: var(--text-dark); }
+.data-table tr:hover td { background: #f5faf5; }
+
+footer {
+  background: var(--blue-dark); padding: 2.5rem 2rem; text-align: center;
+}
+footer p { color: rgba(255,255,255,0.35); font-size: 0.75rem; max-width: 600px; margin: 0 auto; line-height: 1.7; }
+
+@media (max-width: 800px) {
+  .content-grid { grid-template-columns: 1fr; }
+  .actor-grid { grid-template-columns: 1fr; }
+  .arch-grid { grid-template-columns: 1fr 1fr; }
+  .integration-grid { grid-template-columns: 1fr; }
+  .map-section { grid-template-columns: 1fr; }
+  nav { display: none; }
+  .hero h1 { font-size: 1.8rem; }
+}
+@media (max-width: 500px) {
+  .arch-grid { grid-template-columns: 1fr; }
+  .chain-node { min-width: 80px; padding: 0.5rem 0.8rem; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <a href="#" class="logo">
+      <div class="logo-icon">P</div>
+      <div class="logo-text"><strong>Producer-to-Market</strong>Linkage Module</div>
+    </a>
+    <nav>
+      <a href="#assessment">Assessment</a>
+      <a href="#actors">Actors</a>
+      <a href="#data">Data</a>
+      <a href="#architecture">Architecture</a>
+      <a href="#gis">GIS</a>
+      <a href="#integration">Integration</a>
+    </nav>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="hero-content">
+    <div class="hero-badge">AV CIS — Module Definition</div>
+    <h1>Producer-to-Primary Market<br><span>Linkage Module</span></h1>
+    <p>Defining how producers from different villages connect through aggregation points, warehouses, and primary marketplaces — within the broader national agricultural value chain information system.</p>
+  </div>
+</section>
+
+<!-- 1. Current System Assessment -->
+<section class="section" id="assessment">
+  <div class="section-label">1. Current System Assessment</div>
+  <h2 class="section-title">Existing Warehouse & Aggregation System</h2>
+  <p class="section-sub">Understanding the current state of operations, who uses the system, what data it captures, and how the producer-to-market linkage currently works.</p>
+  <div class="content-grid">
+    <div class="content-card">
+      <h4>📋 Current Scope</h4>
+      <ul>
+        <li><strong>System:</strong> Warehouse & aggregation tracking (paper + basic digital records)</li>
+        <li><strong>Primary users:</strong> Warehouse managers, aggregators, district agricultural officers</li>
+        <li><strong>Coverage:</strong> 6 major districts — Kampala, Gulu, Mbale, Jinja, Masindi, Soroti</li>
+        <li><strong>Commodities tracked:</strong> Coffee, maize, beans, sesame, cassava, groundnuts</li>
+        <li><strong>Data format:</strong> Manual ledgers at aggregation points, spreadsheets at warehouses</li>
+      </ul>
+    </div>
+    <div class="content-card">
+      <h4>🔗 Current Linkage Flow</h4>
+      <ul>
+        <li><strong>Producer → Aggregation:</strong> Farmers deliver to nearest village aggregation point. No digital tracking of individual producer contributions.</li>
+        <li><strong>Aggregation → Warehouse:</strong> Aggregated bulks are transported to district warehouses. Receive manually recorded.</li>
+        <li><strong>Warehouse → Market:</strong> Stock released to primary markets on verbal or paper orders. Limited visibility of available stock.</li>
+        <li><strong>Market → Trader:</strong> Traders purchase at market without visibility into upstream supply chain.</li>
+      </ul>
+    </div>
+    <div class="content-card">
+      <h4>⚠️ Key Gaps</h4>
+      <ul>
+        <li>No producer identification — cannot trace commodity back to individual farmer</li>
+        <li>No real-time stock visibility across the chain</li>
+        <li>Price information is fragmented — farmers lack market price data</li>
+        <li>No geospatial mapping of production areas, aggregation points, or warehouses</li>
+        <li>Quality grading is inconsistent across aggregation centres</li>
+        <li>No linkage between producer registration and commodity flow</li>
+      </ul>
+    </div>
+    <div class="content-card">
+      <h4>📌 What Needs to Change</h4>
+      <ul>
+        <li>Each producer must have a unique digital ID linked to their production</li>
+        <li>Each aggregation point, warehouse, and market must be geolocated</li>
+        <li>Commodity flow must be digitally tracked from farmer through to market sale</li>
+        <li>Real-time stock levels and prices must be visible to all authorised actors</li>
+        <li>Quality grading data must accompany every lot through the chain</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- 2. Producer-to-Market Workflow -->
+<section class="section bg-white">
+  <div class="section-label">2. Producer-to-Market Workflow</div>
+  <h2 class="section-title">Value Chain Section — Our Scope</h2>
+  <p class="section-sub">The segment of the national value chain this module is responsible for: from the producer through aggregation, warehousing, and delivery to the primary market and off-takers.</p>
+  <div class="chain-flow">
+    <div class="chain-node"><div class="chain-node-icon">👨‍🌾</div><div class="chain-node-label">Producer</div></div>
+    <span class="chain-arrow">→</span>
+    <div class="chain-node"><div class="chain-node-icon">🏘️</div><div class="chain-node-label">Village Group</div></div>
+    <span class="chain-arrow">→</span>
+    <div class="chain-node"><div class="chain-node-icon">📦</div><div class="chain-node-label">Aggregation Point</div></div>
+    <span class="chain-arrow">→</span>
+    <div class="chain-node"><div class="chain-node-icon">🏬</div><div class="chain-node-label">Warehouse</div></div>
+    <span class="chain-arrow">→</span>
+    <div class="chain-node"><div class="chain-node-icon">🏪</div><div class="chain-node-label">Primary Market</div></div>
+    <span class="chain-arrow">→</span>
+    <div class="chain-node"><div class="chain-node-icon">🤝</div><div class="chain-node-label">Off-taker</div></div>
+  </div>
+  <div style="margin-top:2rem;display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+    <div style="background:#f0f6f0;padding:1rem;border-radius:8px">
+      <h4 style="font-size:0.85rem;margin-bottom:0.5rem">📥 Supply Side</h4>
+      <p style="font-size:0.78rem;color:var(--text-muted);line-height:1.6">
+        <strong>Producers</strong> deliver harvest to village collection points.<br>
+        <strong>Village groups</strong> aggregate smallholder output.<br>
+        <strong>Extension agents</strong> advise on quality and timing.<br>
+        <strong>Aggregators</strong> consolidate, grade, and prepare for transport.
+      </p>
+    </div>
+    <div style="background:#f0f6f0;padding:1rem;border-radius:8px">
+      <h4 style="font-size:0.85rem;margin-bottom:0.5rem">📤 Market Side</h4>
+      <p style="font-size:0.78rem;color:var(--text-muted);line-height:1.6">
+        <strong>Warehouses</strong> receive, store, and issue stock.<br>
+        <strong>Primary markets</strong> facilitate price discovery and trade.<br>
+        <strong>Traders/Off-takers</strong> purchase for processing or resale.<br>
+        <strong>Market operators</strong> oversee transactions and data capture.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- 3. Actors & Responsibilities -->
+<section class="section" id="actors">
+  <div class="section-label">3. Actors & Responsibilities</div>
+  <h2 class="section-title">Who Does What</h2>
+  <p class="section-sub">Every actor in the producer-to-market linkage has defined roles and data responsibilities within the system.</p>
+  <div class="actor-grid">
+    <div class="actor-card">
+      <h4>👨‍🌾 Farmer / Producer</h4>
+      <p>Registers with system, receives unique ID. Reports production volumes, crop types, and harvest dates. Delivers to aggregation point and receives payment.</p>
+    </div>
+    <div class="actor-card">
+      <h4>🏘️ Farmer Group</h4>
+      <p>Organises smallholder members, coordinates collective delivery to aggregation point. Maintains group membership and consolidated production data.</p>
+    </div>
+    <div class="actor-card">
+      <h4>🧑‍🌾 Extension Agent</h4>
+      <p>Registers farmers, provides advisory on quality standards, monitors production estimates, verifies delivery records at aggregation points.</p>
+    </div>
+    <div class="actor-card">
+      <h4>📦 Aggregator</h4>
+      <p>Operates aggregation centre. Receives produce from farmers/groups, grades quality, weighs, records volumes. Issues digital receipt. Manages stock prior to warehouse transfer.</p>
+    </div>
+    <div class="actor-card">
+      <h4>🏬 Warehouse Operator</h4>
+      <p>Receives aggregated stock, issues warehouse receipt. Manages inventory, storage conditions, stock releases. Reports stock levels and movements in real time.</p>
+    </div>
+    <div class="actor-card">
+      <h4>🏪 Market Operator</h4>
+      <p>Manages primary market trading. Records commodities arriving, prices traded, trader transactions. Links warehouse releases to market sales.</p>
+    </div>
+    <div class="actor-card">
+      <h4>🤝 Trader / Off-taker</h4>
+      <p>Registered buyer on the platform. Views available stock at markets and warehouses. Purchases commodities, records transaction. Accessible for processing or resale.</p>
+    </div>
+    <div class="actor-card">
+      <h4>🏛️ District Officer</h4>
+      <p>Oversees aggregation and warehouse operations within district. Monitors volumes, prices, and compliance. Reports to national level.</p>
+    </div>
+    <div class="actor-card">
+      <h4>📊 M&E Officer</h4>
+      <p>Uses system dashboards to track value chain performance. Monitors producer participation, volumes moved, market access, and price trends.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 4. Data Captured at Each Stage -->
+<section class="section bg-white" id="data">
+  <div class="section-label">4. Data Requirements</div>
+  <h2 class="section-title">Information Captured at Each Stage</h2>
+  <p class="section-sub">The system must capture structured data at every node of the producer-to-market linkage, enabling traceability, analytics, and decision-making.</p>
+  <table class="data-table">
+    <thead>
+      <tr><th>Stage</th><th>Data Captured</th><th>Who Captures</th><th>Format</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>👨‍🌾 Producer</strong></td>
+        <td>Name, location (GPS), farm size, crops grown, expected yield, farmer ID</td>
+        <td>Extension agent during registration</td>
+        <td>Structured form + GPS coordinates</td>
+      </tr>
+      <tr>
+        <td><strong>🌾 Production</strong></td>
+        <td>Harvest date, volume harvested (kg), crop type, variety, quality estimate</td>
+        <td>Farmer / Extension agent</td>
+        <td>Mobile form with photo evidence</td>
+      </tr>
+      <tr>
+        <td><strong>🏘️ Village Group</strong></td>
+        <td>Group name, member count, total production, collection schedule</td>
+        <td>Group leader</td>
+        <td>Registration + periodic updates</td>
+      </tr>
+      <tr>
+        <td><strong>📦 Aggregation Point</strong></td>
+        <td>Location (GPS), capacity, commodity received (type, volume, farmer ID, date), grade assigned, weight, moisture content</td>
+        <td>Aggregator</td>
+        <td>Digital weighbridge + mobile form</td>
+      </tr>
+      <tr>
+        <td><strong>🏬 Warehouse</strong></td>
+        <td>Location (GPS), storage capacity, stock-in (source, commodity, volume, grade, date), stock-out (destination, volume, date), current inventory, storage conditions</td>
+        <td>Warehouse operator</td>
+        <td>Warehouse management module</td>
+      </tr>
+      <tr>
+        <td><strong>🏪 Primary Market</strong></td>
+        <td>Market location (GPS), commodities traded, volumes, prices (min/max/average), trader details, date</td>
+        <td>Market operator</td>
+        <td>Market transaction form</td>
+      </tr>
+      <tr>
+        <td><strong>🤝 Off-taker/Trader</strong></td>
+        <td>Trader ID, purchase volume, price paid, destination, payment method</td>
+        <td>Market operator / Trader</td>
+        <td>Transaction record</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- 5. Module Architecture -->
+<section class="section" id="architecture">
+  <div class="section-label">5. Module Architecture</div>
+  <h2 class="section-title">Producer-to-Market System Modules</h2>
+  <p class="section-sub">The module is composed of interconnected sub-modules, each handling a specific segment of the producer-to-market linkage.</p>
+  <div style="max-width:700px;margin:0 auto">
+    <div class="arch-grid">
+      <div class="arch-card"><div class="icon">👨‍🌾</div><h4>Producer Registration</h4><p>Farmer ID, farm profile, group membership</p></div>
+      <div class="arch-card"><div class="icon">📊</div><h4>Production Information</h4><p>Crop tracking, yield estimates, harvest records</p></div>
+      <div class="arch-card"><div class="icon">📦</div><h4>Aggregation Management</h4><p>Receiving, grading, weighing, digital receipts</p></div>
+      <div class="arch-flow">↓</div>
+      <div class="arch-flow">↓</div>
+      <div class="arch-flow">↓</div>
+      <div class="arch-card"><div class="icon">🏬</div><h4>Warehouse Management</h4><p>Inventory, storage, stock movements, e-receipts</p></div>
+      <div class="arch-card"><div class="icon">🏪</div><h4>Primary Market Linkage</h4><p>Stock-to-market, price discovery, trade matching</p></div>
+      <div class="arch-card"><div class="icon">🤝</div><h4>Trader Connection</h4><p>Buyer registration, purchase records, off-take tracking</p></div>
+    </div>
+  </div>
+  <div style="margin-top:2rem;padding:1.2rem;background:#f0f6f0;border-radius:8px;text-align:center">
+    <p style="font-size:0.8rem;color:var(--text-muted)"><strong>Cross-cutting services:</strong> GIS mapping · API gateway · Authentication · Notifications · Reporting</p>
+  </div>
+</section>
+
+<!-- 6. GIS Requirements -->
+<section class="section bg-white" id="gis">
+  <div class="section-label">6. Geospatial Requirements</div>
+  <h2 class="section-title">GIS Mapping of the Value Chain</h2>
+  <p class="section-sub">Every node in the producer-to-market chain must be geolocated. The GIS layer connects them visually and enables spatial analysis of production, aggregation, storage, and trade.</p>
+  <div class="map-section">
+    <div id="uganda-map" style="width:100%;height:450px;border-radius:10px;border:1px solid #e0e8e0;z-index:1"></div>
+    <div class="map-legend">
+      <h4>Map Legend</h4>
+      <div class="legend-item"><span class="legend-dot" style="background:#52b788"></span> Farm / Village</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#d4a746"></span> Aggregation Centre</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#4a7c9b"></span> Warehouse</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#2d6a4f"></span> Primary Market</div>
+      <div style="margin-top:1rem;padding:0.8rem;background:#f0f6f0;border-radius:8px">
+        <p style="font-size:0.75rem;color:var(--text-muted)"><strong>GIS Requirements:</strong></p>
+        <ul style="font-size:0.72rem;color:var(--text-muted);list-style:none;padding:0;margin-top:0.4rem">
+          <li style="padding:0.15rem 0">• Every node must have GPS coordinates</li>
+          <li style="padding:0.15rem 0">• Layers: production zones, aggregation points, warehouses, markets, transport routes</li>
+          <li style="padding:0.15rem 0">• Click any marker to view node details</li>
+          <li style="padding:0.15rem 0">• Route lines showing commodity flow paths</li>
+          <li style="padding:0.15rem 0">• Heat maps for production density</li>
+          <li style="padding:0.15rem 0">• Buffer analysis around aggregation centres</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 7. Integration Requirements -->
+<section class="section" id="integration">
+  <div class="section-label">7. Integration Points</div>
+  <h2 class="section-title">External System Connections</h2>
+  <p class="section-sub">This module does not operate in isolation. It must integrate with existing and planned national systems through defined APIs and data exchange protocols.</p>
+  <div class="integration-grid">
+    <div class="int-card">
+      <h4>📝 National Registration System</h4>
+      <p>Bi-directional sync of farmer, trader, and aggregator identities. Receive verified IDs, push registration data for new actors enrolled through this module.</p>
+    </div>
+    <div class="int-card">
+      <h4>💳 Payment System</h4>
+      <p>Trigger payments to farmers upon delivery at aggregation point. Integrate with mobile money (MTN/Airtel) for direct producer settlements. Record payment transactions.</p>
+    </div>
+    <div class="int-card">
+      <h4>📊 Market Information System</h4>
+      <p>Push real-time prices and volumes from primary markets. Receive market intelligence (price trends, demand data) to inform producers and aggregators.</p>
+    </div>
+    <div class="int-card">
+      <h4>🚚 Logistics System</h4>
+      <p>Share transport requests from aggregation centres and warehouses. Receive fleet availability, track commodity movements, optimise collection routes.</p>
+    </div>
+    <div class="int-card">
+      <h4>📈 M&E Dashboard</h4>
+      <p>Supply aggregated data on producer participation, volumes aggregated, warehouse occupancy, market throughput, and price trends for national monitoring.</p>
+    </div>
+    <div class="int-card">
+      <h4>🧾 Financial Inclusion</h4>
+      <p>Share producer transaction history to support credit scoring. Enable linkage to agricultural finance products based on reliable production and sales data.</p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <p><strong>Producer-to-Primary Market Linkage Module</strong> — Part of the Agricultural Value Chain Information System (AV CIS). Designed to connect producers from village level through aggregation, warehousing, and primary markets using geospatial data, real-time tracking, and interoperable APIs.</p>
+</footer>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+var map = L.map('uganda-map', { center: [1.8, 32.5], zoom: 7, zoomControl: true });
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  attribution: '&copy; OpenStreetMap contributors', maxZoom: 18
+}).addTo(map);
+
+var farmIcon = L.divIcon({ className: '', html: '<div style="width:12px;height:12px;border-radius:50%;background:#52b788;border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,0.3)"></div>', iconSize: [12,12], iconAnchor: [6,6] });
+var aggIcon = L.divIcon({ className: '', html: '<div style="width:14px;height:14px;border-radius:50%;background:#d4a746;border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,0.3)"></div>', iconSize: [14,14], iconAnchor: [7,7] });
+var whIcon = L.divIcon({ className: '', html: '<div style="width:14px;height:14px;background:#4a7c9b;border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,0.3);border-radius:3px"></div>', iconSize: [14,14], iconAnchor: [7,7] });
+var mktIcon = L.divIcon({ className: '', html: '<div style="width:18px;height:18px;border-radius:50%;background:#2d6a4f;border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,0.3)"></div>', iconSize: [18,18], iconAnchor: [9,9] });
+
+var farms = [
+  [2.8, 32.2, 'Gulu Farm Cluster', '3,200 farmers, coffee & maize'],
+  [3.0, 31.0, 'Arua Smallholders', '1,800 farmers, cassava & beans'],
+  [1.9, 33.0, 'Soroti Producers', '2,100 farmers, sesame & groundnuts'],
+  [1.2, 34.5, 'Mbale Highlands', '1,600 farmers, coffee & bananas'],
+  [0.6, 33.0, 'Jinja Lakeside', '1,400 farmers, maize & beans'],
+  [2.2, 31.5, 'Masindi Growers', '1,900 farmers, maize & cotton'],
+  [0.5, 32.5, 'Mukono Farmers', '1,100 farmers, coffee & cassava'],
+  [3.2, 32.8, 'Kitgum Farm Group', '850 farmers, sorghum & beans'],
+  [1.5, 31.5, 'Kiryandongo Settlement', '1,200 farmers, maize & groundnuts'],
+  [1.0, 31.0, 'Hoima Growers', '950 farmers, coffee & beans']
+];
+farms.forEach(function(f) {
+  L.marker([f[0], f[1]], { icon: farmIcon }).addTo(map)
+    .bindPopup('<strong>' + f[2] + '</strong><br>' + f[3] + '<br>Status: Active');
+});
+
+var aggs = [
+  [2.7, 32.3, 'Gulu Aggregation Hub', 'Capacity 12,000 MT'],
+  [1.8, 33.2, 'Soroti Bulking Centre', 'Capacity 8,500 MT'],
+  [1.1, 34.3, 'Mbale Grading Centre', 'Capacity 10,000 MT'],
+  [0.4, 33.2, 'Jinja Aggregation Point', 'Capacity 6,200 MT'],
+  [2.3, 31.4, 'Masindi Bulking Shed', 'Capacity 7,800 MT'],
+  [0.7, 30.8, 'Hoima Aggregation Hub', 'Capacity 5,400 MT']
+];
+aggs.forEach(function(a) {
+  L.marker([a[0], a[1]], { icon: aggIcon }).addTo(map)
+    .bindPopup('<strong>' + a[2] + '</strong><br>' + a[3] + '<br>Certified: Yes');
+});
+
+var warehouses = [
+  [2.6, 32.4, 'Gulu Regional Warehouse', '25,000 MT', '72%'],
+  [1.9, 33.1, 'Soroti Storage', '18,000 MT', '65%'],
+  [1.2, 34.4, 'Mbale Cold Storage', '12,000 MT', '58%'],
+  [0.5, 33.0, 'Jinja Central Warehouse', '30,000 MT', '81%'],
+  [2.2, 31.6, 'Masindi Grain Silos', '20,000 MT', '45%'],
+  [0.3, 32.8, 'Kampala Logistics Hub', '50,000 MT', '67%']
+];
+warehouses.forEach(function(w) {
+  L.marker([w[0], w[1]], { icon: whIcon }).addTo(map)
+    .bindPopup('<strong>' + w[2] + '</strong><br>Capacity: ' + w[3] + '<br>Occupancy: ' + w[4]);
+});
+
+var markets = [
+  [0.32, 32.58, 'Kampala Primary Market', 'Uganda\'s largest market', '2,430 farmers', '214 traders'],
+  [2.77, 32.30, 'Gulu Main Market', 'Northern regional hub', '1,820 farmers', '98 traders'],
+  [1.08, 34.17, 'Mbale Central Market', 'Eastern commodity exchange', '1,560 farmers', '87 traders'],
+  [0.61, 33.20, 'Jinja Market', 'Central trading hub', '1,240 farmers', '72 traders'],
+  [2.22, 31.41, 'Masindi Market', 'Western regional market', '980 farmers', '54 traders']
+];
+markets.forEach(function(m) {
+  L.marker([m[0], m[1]], { icon: mktIcon }).addTo(map)
+    .bindPopup('<strong>' + m[2] + '</strong><br>' + m[3] + '<br>Farmers: ' + m[4] + '<br>Traders: ' + m[5]);
+});
+
+// Routes
+var routes = [
+  [[2.8,32.2],[2.7,32.3],[2.6,32.4],[2.77,32.30]],
+  [[1.9,33.0],[1.8,33.2],[1.9,33.1],[1.08,34.17]],
+  [[1.2,34.5],[1.1,34.3],[1.2,34.4],[0.32,32.58]],
+  [[0.6,33.0],[0.4,33.2],[0.5,33.0],[0.61,33.20]],
+  [[2.2,31.5],[2.3,31.4],[2.2,31.6],[2.22,31.41]],
+  [[0.5,32.5],[0.32,32.58]],
+  [[3.2,32.8],[2.7,32.3],[2.6,32.4]]
+];
+routes.forEach(function(r) {
+  L.polyline(r, { color: '#52b788', weight: 2, opacity: 0.35, dashArray: '6,8' }).addTo(map);
+});
+
+var group = L.featureGroup();
+map.eachLayer(function(l) { if(l instanceof L.Marker) group.addLayer(l); });
+if(group.getLayers().length) map.fitBounds(group.getBounds().pad(0.15));
+</script>
+</body>
+</html>
