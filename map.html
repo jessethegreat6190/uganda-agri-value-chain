@@ -955,18 +955,18 @@ document.addEventListener('click', function hideHintOnce(e) {
 const LAYER_CONFIG = [
   { id: 'producers', label: 'Producers / Farmers', color: '#22c55e', count: 12, defaultOn: true,
     markers: [
-      { lat: 1.07, lng: 34.18, name:'Bugisu Cooperative Union', village:'Mbale', crops:['Coffee'], farmers:18000, desc:'UCDA-certified Arabica coffee cooperative on Mt. Elgon slopes. Established 1954. ~18,000 members. WRS pilot participant.' },
-      { lat: -0.15, lng: 29.98, name:'Nyakatonzi Co-operative Union', village:'Kasese/Bushenyi', crops:['Cotton','Coffee'], farmers:15000, desc:'Western Uganda cooperative union. 15,000+ members. Cotton and coffee. WRS pilot participant. Soybean & sunflower diversification underway.' },
-      { lat: -0.62, lng: 30.65, name:'Banyankole Kweterana Cooperative Union', village:'Mbarara', crops:['Coffee'], farmers:5000, desc:'Coffee WRS-certified cooperative in south-western Uganda. Certified warehouse operator.' },
-      { lat: -0.45, lng: 30.90, name:'Muhame Cooperative Society', village:'Western Uganda', crops:['Coffee'], farmers:3200, desc:'Coffee WRS-certified cooperative. Registered warehouse operator for Robusta coffee.' },
-      { lat: 0.348, lng: 32.580, name:'NUCAFE Farmer Groups', village:'National', crops:['Coffee'], farmers:1500000, desc:'National Union of Coffee Agro-processors and Farmers Enterprises (est. 1995). 1.5M farmers, 200+ associations nationwide. Solar-powered factory in Namanve.' },
-      { lat: 0.332, lng: 32.618, name:'ESAFF Uganda', village:'National (54 districts)', crops:['Mixed'], farmers:12588, desc:'Eastern & Southern Africa Small-scale Farmers Forum. 12,588 small-scale farmer community organisations operating across 54 districts in Uganda.' },
-      { lat: 0.315, lng: 32.565, name:'NAAC', village:'National', crops:['Mixed'], farmers:500000, desc:'National Alliance of Agricultural Cooperatives in Uganda. Umbrella for all agri-cooperatives nationwide, representing over 500,000 farmers.' },
-      { lat: 2.77, lng: 32.30, name:'Gulu Coffee Farmers Cooperative', village:'Gulu', crops:['Coffee','Maize'], farmers:4500, desc:'Northern Robusta coffee zone cooperative. Major maize and coffee production area.' },
-      { lat: 1.72, lng: 33.61, name:'Soroti Soybean & Groundnut Farmers', village:'Soroti', crops:['Sesame','Groundnuts'], farmers:3800, desc:'Eastern region soybean and groundnut production cluster. Lango & Teso sub-regions.' },
-      { lat: 2.24, lng: 32.90, name:'Lira Maize & Sesame Farmers Group', village:'Lira', crops:['Maize','Sesame'], farmers:4200, desc:'Lango sub-region maize and sesame growers. Sunflower oilseed production zone.' },
-      { lat: 3.02, lng: 30.91, name:'Arua Cassava & Bean Producers', village:'Arua', crops:['Cassava','Beans'], farmers:5200, desc:'West Nile region cassava and bean production. Major food security zone.' },
-      { lat: 1.44, lng: 31.35, name:'Hoima Coffee Growers Cooperative', village:'Hoima', crops:['Coffee','Beans'], farmers:2800, desc:'Albertine region coffee and bean producers. Near Lake Albert farming zone.' }
+      { lat: 1.07, lng: 34.18, name:'Bugisu Cooperative Union', village:'Mbale', crops:['Coffee'], farmers:18000, volume:3200, desc:'UCDA-certified Arabica coffee cooperative on Mt. Elgon slopes. Established 1954. ~18,000 members. ~3,200 MT/year. WRS pilot participant.' },
+      { lat: -0.15, lng: 29.98, name:'Nyakatonzi Co-operative Union', village:'Kasese/Bushenyi', crops:['Cotton','Coffee'], farmers:15000, volume:4500, desc:'Western Uganda cooperative union. 15,000+ members. ~4,500 MT/year cotton & coffee. WRS pilot participant. Soybean & sunflower diversification underway.' },
+      { lat: -0.62, lng: 30.65, name:'Banyankole Kweterana Cooperative Union', village:'Mbarara', crops:['Coffee'], farmers:5000, volume:1800, desc:'Coffee WRS-certified cooperative in south-western Uganda. ~1,800 MT/year. Certified warehouse operator.' },
+      { lat: -0.45, lng: 30.90, name:'Muhame Cooperative Society', village:'Western Uganda', crops:['Coffee'], farmers:3200, volume:1100, desc:'Coffee WRS-certified cooperative. ~1,100 MT/year. Registered warehouse operator for Robusta coffee.' },
+      { lat: 0.348, lng: 32.580, name:'NUCAFE Farmer Groups', village:'National', crops:['Coffee'], farmers:1500000, volume:120000, desc:'National Union of Coffee Agro-processors and Farmers Enterprises (est. 1995). 1.5M farmers, 200+ associations. ~120,000 MT/year. Solar-powered factory in Namanve.' },
+      { lat: 0.332, lng: 32.618, name:'ESAFF Uganda', village:'National (54 districts)', crops:['Mixed'], farmers:12588, volume:8500, desc:'Eastern & Southern Africa Small-scale Farmers Forum. 12,588 community organisations across 54 districts. ~8,500 MT/year aggregate.' },
+      { lat: 0.315, lng: 32.565, name:'NAAC', village:'National', crops:['Mixed'], farmers:500000, volume:95000, desc:'National Alliance of Agricultural Cooperatives in Uganda. Umbrella for all agri-cooperatives, 500,000+ farmers. ~95,000 MT/year aggregate.' },
+      { lat: 2.77, lng: 32.30, name:'Gulu Coffee Farmers Cooperative', village:'Gulu', crops:['Coffee','Maize'], farmers:4500, volume:2800, desc:'Northern Robusta coffee zone cooperative. ~2,800 MT/year. Major maize and coffee production area.' },
+      { lat: 1.72, lng: 33.61, name:'Soroti Soybean & Groundnut Farmers', village:'Soroti', crops:['Sesame','Groundnuts'], farmers:3800, volume:1900, desc:'Eastern region soybean and groundnut cluster. ~1,900 MT/year. Lango & Teso sub-regions.' },
+      { lat: 2.24, lng: 32.90, name:'Lira Maize & Sesame Farmers Group', village:'Lira', crops:['Maize','Sesame'], farmers:4200, volume:3500, desc:'Lango sub-region maize and sesame growers. ~3,500 MT/year. Sunflower oilseed production zone.' },
+      { lat: 3.02, lng: 30.91, name:'Arua Cassava & Bean Producers', village:'Arua', crops:['Cassava','Beans'], farmers:5200, volume:4100, desc:'West Nile region cassava and bean production. ~4,100 MT/year. Major food security zone.' },
+      { lat: 1.44, lng: 31.35, name:'Hoima Coffee Growers Cooperative', village:'Hoima', crops:['Coffee','Beans'], farmers:2800, volume:1500, desc:'Albertine region coffee and bean producers. ~1,500 MT/year. Near Lake Albert farming zone.' }
     ]
   },
   { id: 'aggregation', label: 'Aggregation / Bulking', color: '#f59e0b', count: 6, defaultOn: true,
@@ -1053,10 +1053,30 @@ const LAYER_CONFIG = [
       { lat: 1.08, lng: 34.17, name:'Mbale Arabica Wet Mill', location:'Mbale', type:'Arabica washed coffee processing', supply:['Bugisu Cooperative Union'], desc:'Mt. Elgon washed Arabica processing. UCDA wet mill distribution programme.' },
       { lat: 2.25, lng: 32.90, name:'Lira Sunflower Oil Mills', location:'Lira', type:'Sunflower oil extraction, 50+ facilities', supply:['Lira Maize & Sesame Farmers Group','Soroti Soybean & Groundnut Farmers'], desc:'50+ oil milling facilities in Lira district (GOAL Uganda report). Mukwano, Nile Agro, Mount Meru.' }
     ]
+  },
+  { id: 'secondary-markets', label: 'Secondary / Retail Markets', color: '#a855f7', count: 8, defaultOn: true,
+    markers: [
+      { lat: 0.310, lng: 32.582, name:'Kampala Central Retail Hub', location:'Kampala', type:'Retail distribution', products:['Coffee flour','Maize flour','Sunflower oil'], connected:['Kampala Coffee Dry Mills','Mount Meru Millers','Afrokai Limited'], desc:'Central Kampala retail distribution. Supermarkets (Nakumatt, Game), local dukas, institutional buyers.' },
+      { lat: 0.335, lng: 32.615, name:'Kampala Export Processing Zone', location:'Kampala', type:'Export aggregation', products:['Coffee','Sesame','Fish'], connected:['Mwanyi Uganda Coffee Exporters','Imbari Coffee Inc.','UGACOF (Uganda Coffee Company)'], desc:'Export aggregation zone. Containers to Mombasa port (coffee), Dubai (sesame), EU (fish).' },
+      { lat: 0.05, lng: 32.46, name:'Entebbe Lake Transport Hub', location:'Entebbe', type:'Lake transport / Export', products:['Coffee','Fish','Tea'], connected:['Kampala Export Processing Zone'], desc:'Lake Victoria ferry to Tanzania (Mwanza). Fish processing and export. Tea shipments.' },
+      { lat: 0.47, lng: 34.08, name:'Busia Cross-Border Market', location:'Busia', type:'Regional trade hub', products:['Maize','Beans','Rice'], connected:['Watujo Agro Produce Ltd','Jinja Maize Millers'], desc:'Kenya-Uganda cross-border trade. 200+ traders. Regional grain and produce exchange.' },
+      { lat: 1.05, lng: 34.27, name:'Mbale Cross-Border Market', location:'Tororo', type:'Regional trade hub', products:['Coffee','Maize'], connected:['Mbale Arabica Wet Mill','Bettagrains Limited'], desc:'Eastern Uganda cross-border trade to Kenya. Coffee and grain transit to Mombasa.' },
+      { lat: 2.77, lng: 32.32, name:'Gulu Northern Distribution', location:'Gulu', type:'Regional distribution', products:['Maize','Sorghum','Beans'], connected:['Lira Sunflower Oil Mills','AFEX Smart Warehouse, Kigumba'], desc:'Northern Uganda distribution centre. South Sudan corridor. Institutional buyers (WFP, NGOs).' },
+      { lat: -0.60, lng: 30.66, name:'Mbarara Regional Distribution', location:'Mbarara', type:'Regional distribution', products:['Coffee','Tea','Milk'], connected:['Mbarara Coffee Wet Mill','Banyankole Kweterana Cooperative Union'], desc:'South-western Uganda distribution. Rwanda/Burundi border trade. Dairy and coffee retail.' },
+      { lat: 1.75, lng: 33.60, name:'Soroti Regional Distribution', location:'Soroti', type:'Regional distribution', products:['Sesame','Groundnuts','Sorghum'], connected:['Soroti Soybean & Groundnut Farmers','Lira Sunflower Oil Mills'], desc:'Teso sub-region distribution. Karamoja corridor. Institutional and retail buyers.' }
+    ]
+  },
+  { id: 'lakes', label: 'Lakes & Water', color: '#60a5fa', count: 5, defaultOn: true,
+    lakes: true,
+    features: [
+      { name:'Lake Victoria', coords:[[−0.05,32.50],[−0.10,32.60],[−0.25,32.75],[−0.40,32.85],[−0.50,33.00],[−0.55,33.10],[−0.55,33.20],[−0.50,33.25],[−0.40,33.25],[−0.30,33.15],[−0.20,33.05],[−0.10,32.95],[0.00,32.90],[0.05,32.80],[0.10,32.70],[0.05,32.55],[−0.05,32.50]], desc:'Africa largest lake. Major fisheries and transport route. Shared with Kenya/Tanzania.' },
+      { name:'Lake Albert', coords:[[2.20,30.85],[2.10,30.95],[1.95,31.05],[1.80,31.15],[1.65,31.25],[1.50,31.30],[1.40,31.25],[1.35,31.15],[1.40,31.00],[1.55,30.90],[1.70,30.85],[1.90,30.82],[2.10,30.82],[2.20,30.85]], desc:'Western Uganda border lake. Albertine Rift fisheries. Oil exploration area.' },
+      { name:'Lake Kyoga', coords:[[1.50,32.80],[1.60,32.90],[1.70,33.00],[1.65,33.10],[1.55,33.15],[1.40,33.10],[1.30,33.00],[1.25,32.90],[1.30,32.82],[1.40,32.78],[1.50,32.80]], desc:'Central Uganda lake. Nile perch fisheries. Irrigation source for Lango Teso.' },
+      { name:'Lake Edward', coords:[[-0.05,29.55],[−0.10,29.65],[−0.15,29.75],[−0.18,29.85],[−0.15,29.95],[−0.10,30.00],[−0.02,30.00],[0.05,29.95],[0.08,29.85],[0.05,29.70],[0.00,29.60],[−0.05,29.55]], desc:'Queen Elizabeth National Park lake. Fisheries and tourism.' },
+      { name:'Lake George', coords:[[−0.25,30.05],[−0.30,30.10],[−0.35,30.15],[−0.38,30.20],[−0.35,30.28],[−0.30,30.30],[−0.22,30.28],[−0.18,30.22],[−0.18,30.15],[−0.20,30.10],[−0.25,30.05]], desc:'Queen Elizabeth National Park. Connected to Lake Edward via Kazinga Channel.' }
+    ]
   }
 ];
-
-const COMMODITY_NODES = {
   'Coffee': ['Bugisu Cooperative Union','Banyankole Kweterana Cooperative Union','Muhame Cooperative Society','Gulu Coffee Farmers Cooperative','NUCAFE Farmer Groups','Hoima Coffee Growers Cooperative','UGACOF (Uganda Coffee Company)','Olam Uganda','Mwanyi Uganda Coffee Exporters','Imbari Coffee Inc.','Kampala Coffee Dry Mills','Mbarara Coffee Wet Mill','Mbale Arabica Wet Mill'],
   'Maize': ['Gulu Coffee Farmers Cooperative','Lira Maize & Sesame Farmers Group','Masindi Bulking Shed','Jinja Aggregation Point','AFEX Smart Warehouse, Kigumba','AFEX Smart Warehouse, Masindi','Jinja Maize Millers','Watujo Agro Produce Ltd','Bettagrains Limited'],
   'Beans': ['Arua Cassava & Bean Producers','Hoima Coffee Growers Cooperative','Jinja Aggregation Point','Watujo Agro Produce Ltd'],
@@ -1068,10 +1088,11 @@ const COMMODITY_NODES = {
   'Sorghum': ['Gulu Coffee Farmers Cooperative','AFEX Smart Warehouse, Lira','AFEX Smart Warehouse, Kigumba'],
   'Livestock': ['Mbarara Market','Gulu Main Market','Moroto Market'],
   'Vegetables': ['Nakawa Market, Kampala','Kalerwe Market, Kampala'],
-  'Grains': ['Afrokai Limited','Bettagrains Limited','Owino Market (St. Balikuddembe)'],
-  'Tea': ['Nyakatonzi Co-operative Union','Mbarara Coffee Wet Mill'],
-  'Bananas': ['Masaka Market','Banyankole Kweterana Cooperative Union','Mbarara Coffee Wet Mill'],
-  'Mixed': ['NAAC','ESAFF Uganda']
+  'Grains': ['Afrokai Limited','Bettagrains Limited','Owino Market (St. Balikuddembe)','Kampala Central Retail Hub'],
+  'Tea': ['Nyakatonzi Co-operative Union','Mbarara Coffee Wet Mill','Mbarara Regional Distribution'],
+  'Bananas': ['Masaka Market','Banyankole Kweterana Cooperative Union','Mbarara Coffee Wet Mill','Mbarara Regional Distribution'],
+  'Mixed': ['NAAC','ESAFF Uganda'],
+  'Secondary Markets': ['Kampala Central Retail Hub','Kampala Export Processing Zone','Entebbe Lake Transport Hub','Busia Cross-Border Market','Mbale Cross-Border Market','Gulu Northern Distribution','Mbarara Regional Distribution','Soroti Regional Distribution']
 };
 
 const VALUE_CHAINS = [
@@ -1122,7 +1143,20 @@ const VALUE_CHAINS = [
   { from: 'Arua Market', to: 'Gulu Main Market', color: '#3b82f6' },
   // Logistics connections
   { from: 'Jinja Market', to: 'Jinja Transport Hub', color: '#8b5cf6' },
-  { from: 'Mbale Central Market', to: 'Malaba Border Post', color: '#8b5cf6' }
+  { from: 'Mbale Central Market', to: 'Malaba Border Post', color: '#8b5cf6' },
+  // Processing → Secondary Market connections
+  { from: 'Kampala Coffee Dry Mills', to: 'Kampala Export Processing Zone', color: '#ef4444' },
+  { from: 'Kampala Export Processing Zone', to: 'Busia Cross-Border Market', color: '#a855f7' },
+  { from: 'Kampala Export Processing Zone', to: 'Mbale Cross-Border Market', color: '#a855f7' },
+  { from: 'Kampala Export Processing Zone', to: 'Entebbe Lake Transport Hub', color: '#a855f7' },
+  { from: 'Kampala Coffee Dry Mills', to: 'Kampala Central Retail Hub', color: '#ef4444' },
+  { from: 'Jinja Maize Millers', to: 'Busia Cross-Border Market', color: '#ef4444' },
+  { from: 'Jinja Maize Millers', to: 'Kampala Central Retail Hub', color: '#ef4444' },
+  { from: 'Mbarara Coffee Wet Mill', to: 'Mbarara Regional Distribution', color: '#ef4444' },
+  { from: 'Mbale Arabica Wet Mill', to: 'Mbale Cross-Border Market', color: '#ef4444' },
+  { from: 'Lira Sunflower Oil Mills', to: 'Gulu Northern Distribution', color: '#ef4444' },
+  { from: 'Lira Sunflower Oil Mills', to: 'Soroti Regional Distribution', color: '#ef4444' },
+  { from: 'Lira Sunflower Oil Mills', to: 'Kampala Central Retail Hub', color: '#ef4444' }
 ];
 
 const MARKET_TRADER_CONNECTIONS = [
@@ -1544,6 +1578,41 @@ function renderRoads() {
   });
 }
 
+// ─── RENDER LAKES ────────────────────────────────────────────────────
+
+function renderLakes() {
+  const lakeLayer = LAYER_CONFIG.find(l => l.id === 'lakes');
+  if (!lakeLayer || !lakeLayer.features) return;
+
+  const gLakes = gMain.append('g').attr('id', 'g-lakes');
+
+  lakeLayer.features.forEach(lake => {
+    const lineGen = d3.line()
+      .x(d => projection([d[1], d[0]])[0])
+      .y(d => projection([d[1], d[0]])[1])
+      .curve(d3.curveCardinalClosed.tension(0.5));
+
+    gLakes.append('path')
+      .attr('class', 'lake-path')
+      .attr('d', lineGen(lake.coords))
+      .attr('fill', '#b3d4f5')
+      .attr('fill-opacity', 0.5)
+      .attr('stroke', '#6ba3d6')
+      .attr('stroke-width', 1)
+      .attr('stroke-opacity', 0.7)
+      .attr('data-layer', 'lakes')
+      .style('cursor', 'pointer')
+      .on('mouseover', function() {
+        d3.select(this).attr('fill-opacity', 0.7);
+        showTooltip(lake.name + ': ' + lake.desc, d3.event || event);
+      })
+      .on('mouseout', function() {
+        d3.select(this).attr('fill-opacity', 0.5);
+        hideTooltip();
+      });
+  });
+}
+
 // ─── FIND NODE ─────────────────────────────────────────────────────────
 
 function findNode(name) {
@@ -1661,6 +1730,7 @@ function showNodeDetails(data, layerCfg, nodeData) {
   if (data.location) html += `<div class="detail-row"><strong>Location:</strong> ${data.location}</div>`;
   if (data.crops) html += `<div class="detail-row"><strong>Crops:</strong> ${data.crops.join(', ')}</div>`;
   if (data.farmers) html += `<div class="detail-row"><strong>Farmers:</strong> ${data.farmers.toLocaleString()}</div>`;
+  if (data.volume) html += `<div class="detail-row"><strong>Production:</strong> ${data.volume.toLocaleString()} MT/year</div>`;
   if (data.capacity) html += `<div class="detail-row"><strong>Capacity:</strong> ${data.capacity}</div>`;
   if (data.occupancy) html += `<div class="detail-row"><strong>Occupancy:</strong> ${data.occupancy}</div>`;
   if (data.focus) html += `<div class="detail-row"><strong>Focus:</strong> ${data.focus.join(', ')}</div>`;
@@ -1668,6 +1738,7 @@ function showNodeDetails(data, layerCfg, nodeData) {
   if (data.residence) html += `<div class="detail-row"><strong>Residence:</strong> ${data.residence}</div>`;
   if (data.tradesAt) html += `<div class="detail-row"><strong>Trades at:</strong> ${data.tradesAt}</div>`;
   if (data.commodities) html += `<div class="detail-row"><strong>Commodities:</strong> ${data.commodities instanceof Array ? data.commodities.join(', ') : data.commodities}</div>`;
+  if (data.products) html += `<div class="detail-row"><strong>Products:</strong> ${data.products.join(', ')}</div>`;
   if (data.services) html += `<div class="detail-row"><strong>Services:</strong> ${data.services.join(', ')}</div>`;
   if (data.type) html += `<div class="detail-row"><strong>Type:</strong> ${data.type}</div>`;
   if (data.supply) html += `<div class="detail-row"><strong>Supply Areas:</strong> ${data.supply.join(', ')}</div>`;
@@ -1807,6 +1878,10 @@ function buildLegend() {
 function toggleLayer(id, on) {
   if (id === 'roads') {
     gConnections.selectAll('.road-line').style('display', on ? null : 'none');
+    return;
+  }
+  if (id === 'lakes') {
+    d3.selectAll('.lake-path').style('display', on ? null : 'none');
     return;
   }
   gNodes.selectAll(`.node-group[data-layer="${id}"]`).style('display', on ? null : 'none');
@@ -2167,6 +2242,7 @@ d3.json('https://raw.githubusercontent.com/has2k1/uganda-boundaries/main/geojson
     renderDistricts(data);
     renderConnections();
     renderRoads();
+    renderLakes();
     renderNodes();
     buildSidebar();
     buildRegionsPanel();
