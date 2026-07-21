@@ -328,30 +328,8 @@ html, body { height: 100%; overflow: hidden; font-family: 'Fraunces', Georgia, s
   color: #fff; margin-bottom: 10px;
 }
 
-/* ─── VERIFIED DATA BADGE ──────────────────────────────────────────────── */
-.sample-badge {
-  position: absolute;
-  top: 68px; right: 16px;
-  z-index: 1000;
-  background: linear-gradient(135deg, #228B22, #1B4332);
-  color: #fff;
-  font-size: 10px; font-weight: 700;
-  text-transform: uppercase; letter-spacing: 1px;
-  padding: 5px 14px; border-radius: 20px;
-  box-shadow: 0 2px 12px rgba(34,139,34,0.3);
-  pointer-events: none;
-  display: flex; align-items: center; gap: 6px;
-}
-.sample-badge::before {
-  content: '';
-  width: 7px; height: 7px;
-  background: #fff; border-radius: 50%;
-  animation: pulse-dot 1.5s ease-in-out infinite;
-}
-@keyframes pulse-dot {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.5; transform: scale(0.75); }
-}
+/* ─── BADGE (hidden) ──────────────────────────────────────────────── */
+.sample-badge { display: none; }
 
 /* ─── MAP TITLE OVERLAY ───────────────────────────────────────────────── */
 .map-title-overlay {
