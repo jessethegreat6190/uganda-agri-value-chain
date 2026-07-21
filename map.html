@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Uganda Agricultural Value Chain Map — UCDA, FAO, AFEX, UWRSA, Farmgain Africa</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700;9..144,800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;0,9..144,800;1,9..144,400;1,9..144,500&display=swap" rel="stylesheet">
 <script src="https://d3js.org/d3.v7.min.js"></script>
 <style>
 :root {
@@ -28,7 +28,7 @@
   --transition: 0.3s cubic-bezier(0.4,0,0.2,1);
 }
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html, body { height: 100%; overflow: hidden; font-family: 'DM Sans', -apple-system, sans-serif; background: #F5F5E8; }
+html, body { height: 100%; overflow: hidden; font-family: 'Fraunces', Georgia, serif; background: #F5F5E8; }
 
 /* ─── MAP ─────────────────────────────────────────────────────────────── */
 #map-container {
@@ -76,7 +76,7 @@ html, body { height: 100%; overflow: hidden; font-family: 'DM Sans', -apple-syst
 .node-group { cursor: pointer; }
 .node-group:hover .node-shape { filter: brightness(1.15); }
 .node-label {
-  font-family: 'DM Sans', sans-serif;
+  font-family: 'Fraunces', Georgia, serif;
   font-size: 9px;
   font-weight: 600;
   fill: var(--text);
@@ -94,7 +94,7 @@ html, body { height: 100%; overflow: hidden; font-family: 'DM Sans', -apple-syst
   border-radius: var(--radius-sm);
   padding: 8px 12px;
   font-size: 12px;
-  font-family: 'DM Sans', sans-serif;
+  font-family: 'Fraunces', Georgia, serif;
   box-shadow: var(--shadow-md);
   pointer-events: none;
   display: none;
@@ -135,7 +135,7 @@ html, body { height: 100%; overflow: hidden; font-family: 'DM Sans', -apple-syst
   border: 1px solid var(--border);
   border-radius: 8px;
   font-size: 13px;
-  font-family: 'DM Sans', sans-serif;
+  font-family: 'Fraunces', Georgia, serif;
   background: var(--surface);
   color: var(--text);
   outline: none;
@@ -162,7 +162,7 @@ html, body { height: 100%; overflow: hidden; font-family: 'DM Sans', -apple-syst
   background: var(--surface);
   color: var(--text-secondary);
   font-size: 12px; font-weight: 500;
-  font-family: 'DM Sans', sans-serif;
+  font-family: 'Fraunces', Georgia, serif;
   cursor: pointer;
   transition: all 0.2s;
   white-space: nowrap;
@@ -210,7 +210,7 @@ html, body { height: 100%; overflow: hidden; font-family: 'DM Sans', -apple-syst
   color: var(--text-secondary);
   cursor: pointer;
   transition: all 0.2s;
-  font-family: 'DM Sans', sans-serif;
+  font-family: 'Fraunces', Georgia, serif;
 }
 .basemap-btn.active { border-color: var(--primary); color: var(--primary); background: rgba(34,139,34,0.08); }
 .basemap-btn:hover { border-color: var(--primary); }
@@ -253,7 +253,7 @@ html, body { height: 100%; overflow: hidden; font-family: 'DM Sans', -apple-syst
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   font-size: 13px;
-  font-family: 'DM Sans', sans-serif;
+  font-family: 'Fraunces', Georgia, serif;
   color: var(--text);
   background: var(--surface);
   outline: none; cursor: pointer;
@@ -367,7 +367,7 @@ html, body { height: 100%; overflow: hidden; font-family: 'DM Sans', -apple-syst
   padding: 10px 24px;
   border-radius: 12px;
   font-size: 14px; font-weight: 500;
-  font-family: 'DM Sans', sans-serif;
+  font-family: 'Fraunces', Georgia, serif;
   pointer-events: none;
   white-space: nowrap;
   box-shadow: var(--shadow-md);
@@ -393,7 +393,7 @@ html, body { height: 100%; overflow: hidden; font-family: 'DM Sans', -apple-syst
   font-size: 18px; font-weight: 600;
   color: var(--text-secondary);
   transition: all 0.15s;
-  font-family: 'DM Sans', sans-serif;
+  font-family: 'Fraunces', Georgia, serif;
 }
 .zoom-btn:first-child { border-radius: var(--radius-sm) var(--radius-sm) 0 0; }
 .zoom-btn:last-child { border-radius: 0 0 var(--radius-sm) var(--radius-sm); }
@@ -422,7 +422,7 @@ html, body { height: 100%; overflow: hidden; font-family: 'DM Sans', -apple-syst
   border-radius: var(--radius);
   box-shadow: var(--shadow-lg);
   text-align: center;
-  font-family: 'DM Sans', sans-serif;
+  font-family: 'Fraunces', Georgia, serif;
   border: 1px solid var(--border);
 }
 .map-loading .spinner {
@@ -603,24 +603,7 @@ html, body { height: 100%; overflow: hidden; font-family: 'DM Sans', -apple-syst
 <!-- TOP BAR -->
 <div class="topbar">
   <div class="topbar-brand">
-    <div class="logo"><svg viewBox="0 0 100 110" width="30" height="33" xmlns="http://www.w3.org/2000/svg">
-      <!-- Shield shape -->
-      <path d="M50 5 L90 25 L90 65 Q90 95 50 108 Q10 95 10 65 L10 25 Z" fill="#000" stroke="#FFD700" stroke-width="3"/>
-      <!-- Wavy chief (top bar - blue/white waves) -->
-      <path d="M15 28 Q25 22 35 28 Q45 34 55 28 Q65 22 75 28 Q85 34 88 28 L88 40 Q78 34 68 40 Q58 46 48 40 Q38 34 28 40 Q18 46 12 40 Z" fill="#1B4F72"/>
-      <!-- Sun in center -->
-      <circle cx="50" cy="58" r="12" fill="#FFD700"/>
-      <g stroke="#FFD700" stroke-width="2.5" stroke-linecap="round">
-        <line x1="50" y1="42" x2="50" y2="38"/><line x1="50" y1="74" x2="50" y2="78"/>
-        <line x1="34" y1="58" x2="30" y2="58"/><line x1="66" y1="58" x2="70" y2="58"/>
-        <line x1="38.7" y1="46.7" x2="35.9" y2="43.9"/><line x1="61.3" y1="69.3" x2="64.1" y2="72.1"/>
-        <line x1="38.7" y1="69.3" x2="35.9" y2="72.1"/><line x1="61.3" y1="46.7" x2="64.1" y2="43.9"/>
-      </g>
-      <!-- Drum at bottom -->
-      <ellipse cx="50" cy="86" rx="10" ry="5" fill="#8B4513" stroke="#FFD700" stroke-width="1"/>
-      <rect x="40" y="80" width="20" height="6" fill="#8B4513"/>
-      <ellipse cx="50" cy="80" rx="10" ry="3" fill="#A0522D" stroke="#FFD700" stroke-width="1"/>
-    </svg></div>
+    <div class="logo"><img src="coat-of-arms.png" alt="Uganda Coat of Arms" style="width:28px;height:28px;object-fit:contain;"></div>
     <div class="title">Uganda <span>AgriValue</span> Chain</div>
   </div>
   <div class="topbar-search">
