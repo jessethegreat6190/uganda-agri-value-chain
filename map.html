@@ -153,7 +153,7 @@ html, body { height: 100%; overflow: hidden; font-family: 'Fraunces', Georgia, s
 .topbar-right {
   display: flex; align-items: center; gap: 8px;
 }
-.topbar-search { width: 200px; position: relative; flex-shrink: 0; }
+.topbar-search { width: 160px; position: relative; flex-shrink: 0; }
 .topbar-search input {
   width: 100%;
   padding: 6px 10px 6px 30px;
@@ -1010,7 +1010,7 @@ const LAYER_CONFIG = [
       { lat: -0.61, lng: 30.66, name:'AFEX Smart Warehouse, Mbarara', location:'Mbarara', capacity:5500, occupancy:48, settlement:'rural', connected:['Banyankole Kweterana Cooperative Union'], commodities:['Coffee','Tea'], desc:'AFEX South-western corridor facility. Coffee and tea storage.' }
     ]
   },
-  { id: 'markets', label: 'Primary Markets', color: '#1a7f5a', count: 14, defaultOn: true,
+  { id: 'markets', label: 'Markets', color: '#1a7f5a', count: 22, defaultOn: true,
     markers: [
       { lat: 0.313, lng: 32.585, name:'Owino Market (St. Balikuddembe)', location:'Kampala', focus:['Mixed'], farmers:8000, traders:1500, settlement:'urban', connected:['AFEX Smart Warehouse, Kampala'], desc:'Uganda\'s largest informal market. 8,000+ vendors. Farmgain Africa coverage.' },
       { lat: 0.337, lng: 32.607, name:'Nakawa Market, Kampala', location:'Kampala', focus:['Vegetables','Grains'], farmers:2430, traders:214, settlement:'urban', connected:['UWRSA Certified Warehouse, Kampala'], desc:'Major produce market in eastern Kampala industrial area. Farmgain Africa tracked prices.' },
@@ -1025,7 +1025,15 @@ const LAYER_CONFIG = [
       { lat: -0.62, lng: 30.65, name:'Mbarara Market', location:'Mbarara', focus:['Coffee','Livestock'], farmers:1100, traders:68, settlement:'rural', connected:['Banyankole Kweterana Cooperative Union'], desc:'South-western hub. Farmgain Africa tracked.' },
       { lat: 3.02, lng: 30.91, name:'Arua Market', location:'Arua', focus:['Cassava','Beans'], farmers:1400, traders:82, settlement:'rural', connected:['Arua Cassava & Bean Producers'], desc:'West Nile region market. Farmgain Africa tracked.' },
       { lat: 2.53, lng: 34.63, name:'Moroto Market', location:'Moroto', focus:['Sorghum','Livestock'], farmers:600, traders:35, settlement:'rural', connected:['Gulu Main Market'], desc:'Karamoja region market. Farmgain Africa tracked.' },
-      { lat: 0.61, lng: 33.47, name:'Iganga Market', location:'Iganga', focus:['Maize','Beans'], farmers:1050, traders:58, settlement:'rural', connected:['Jinja Market'], desc:'Busoga sub-region market. Farmgain Africa tracked.' }
+      { lat: 0.61, lng: 33.47, name:'Iganga Market', location:'Iganga', focus:['Maize','Beans'], farmers:1050, traders:58, settlement:'rural', connected:['Jinja Market'], desc:'Busoga sub-region market. Farmgain Africa tracked.' },
+      { lat: 0.310, lng: 32.582, name:'Kampala Central Retail Hub', location:'Kampala', focus:['Retail'], settlement:'urban', connected:['Kampala Coffee Dry Mills','Mount Meru Millers','Afrokai Limited'], desc:'Central Kampala retail distribution. Supermarkets (Nakumatt, Game), local dukas, institutional buyers.' },
+      { lat: 0.335, lng: 32.615, name:'Kampala Export Processing Zone', location:'Kampala', focus:['Export'], settlement:'urban', connected:['Mwanyi Uganda Coffee Exporters','Imbari Coffee Inc.','UGACOF (Uganda Coffee Company)'], desc:'Export aggregation zone. Containers to Mombasa port (coffee), Dubai (sesame), EU (fish).' },
+      { lat: 0.05, lng: 32.46, name:'Entebbe Lake Transport Hub', location:'Entebbe', focus:['Lake Export'], settlement:'rural', connected:['Kampala Export Processing Zone'], desc:'Lake Victoria ferry to Tanzania (Mwanza). Fish processing and export. Tea shipments.' },
+      { lat: 0.47, lng: 34.08, name:'Busia Cross-Border Market', location:'Busia', focus:['Cross-Border'], settlement:'rural', connected:['Watujo Agro Produce Ltd','Jinja Maize Millers'], desc:'Kenya-Uganda cross-border trade. 200+ traders. Regional grain and produce exchange.' },
+      { lat: 1.05, lng: 34.27, name:'Mbale Cross-Border Market', location:'Tororo', focus:['Cross-Border'], settlement:'rural', connected:['Mbale Arabica Wet Mill','Bettagrains Limited'], desc:'Eastern Uganda cross-border trade to Kenya. Coffee and grain transit to Mombasa.' },
+      { lat: 2.77, lng: 32.32, name:'Gulu Northern Distribution', location:'Gulu', focus:['Distribution'], settlement:'rural', connected:['Lira Sunflower Oil Mills','AFEX Smart Warehouse, Kigumba'], desc:'Northern Uganda distribution centre. South Sudan corridor. Institutional buyers (WFP, NGOs).' },
+      { lat: -0.60, lng: 30.66, name:'Mbarara Regional Distribution', location:'Mbarara', focus:['Distribution'], settlement:'rural', connected:['Mbarara Coffee Wet Mill','Banyankole Kweterana Cooperative Union'], desc:'South-western Uganda distribution. Rwanda/Burundi border trade. Dairy and coffee retail.' },
+      { lat: 1.75, lng: 33.60, name:'Soroti Regional Distribution', location:'Soroti', focus:['Distribution'], settlement:'rural', connected:['Soroti Soybean & Groundnut Farmers','Lira Sunflower Oil Mills'], desc:'Teso sub-region distribution. Karamoja corridor. Institutional and retail buyers.' }
     ]
   },
   { id: 'traders', label: 'Traders / Off-takers', color: '#f97316', count: 10, defaultOn: false,
@@ -1069,18 +1077,6 @@ const LAYER_CONFIG = [
       { lat: 2.25, lng: 32.90, name:'Lira Sunflower Oil Mills', location:'Lira', type:'Sunflower oil extraction, 50+ facilities', settlement:'rural', supply:['Lira Maize & Sesame Farmers Group','Soroti Soybean & Groundnut Farmers'], desc:'50+ oil milling facilities in Lira district (GOAL Uganda report). Mukwano, Nile Agro, Mount Meru.' }
     ]
   },
-  { id: 'secondary-markets', label: 'Secondary / Retail Markets', color: '#a855f7', count: 8, defaultOn: true,
-    markers: [
-      { lat: 0.310, lng: 32.582, name:'Kampala Central Retail Hub', location:'Kampala', type:'Retail distribution', products:['Coffee flour','Maize flour','Sunflower oil'], settlement:'urban', connected:['Kampala Coffee Dry Mills','Mount Meru Millers','Afrokai Limited'], desc:'Central Kampala retail distribution. Supermarkets (Nakumatt, Game), local dukas, institutional buyers.' },
-      { lat: 0.335, lng: 32.615, name:'Kampala Export Processing Zone', location:'Kampala', type:'Export aggregation', products:['Coffee','Sesame','Fish'], settlement:'urban', connected:['Mwanyi Uganda Coffee Exporters','Imbari Coffee Inc.','UGACOF (Uganda Coffee Company)'], desc:'Export aggregation zone. Containers to Mombasa port (coffee), Dubai (sesame), EU (fish).' },
-      { lat: 0.05, lng: 32.46, name:'Entebbe Lake Transport Hub', location:'Entebbe', type:'Lake transport / Export', products:['Coffee','Fish','Tea'], settlement:'rural', connected:['Kampala Export Processing Zone'], desc:'Lake Victoria ferry to Tanzania (Mwanza). Fish processing and export. Tea shipments.' },
-      { lat: 0.47, lng: 34.08, name:'Busia Cross-Border Market', location:'Busia', type:'Regional trade hub', products:['Maize','Beans','Rice'], settlement:'rural', connected:['Watujo Agro Produce Ltd','Jinja Maize Millers'], desc:'Kenya-Uganda cross-border trade. 200+ traders. Regional grain and produce exchange.' },
-      { lat: 1.05, lng: 34.27, name:'Mbale Cross-Border Market', location:'Tororo', type:'Regional trade hub', products:['Coffee','Maize'], settlement:'rural', connected:['Mbale Arabica Wet Mill','Bettagrains Limited'], desc:'Eastern Uganda cross-border trade to Kenya. Coffee and grain transit to Mombasa.' },
-      { lat: 2.77, lng: 32.32, name:'Gulu Northern Distribution', location:'Gulu', type:'Regional distribution', products:['Maize','Sorghum','Beans'], settlement:'rural', connected:['Lira Sunflower Oil Mills','AFEX Smart Warehouse, Kigumba'], desc:'Northern Uganda distribution centre. South Sudan corridor. Institutional buyers (WFP, NGOs).' },
-      { lat: -0.60, lng: 30.66, name:'Mbarara Regional Distribution', location:'Mbarara', type:'Regional distribution', products:['Coffee','Tea','Milk'], settlement:'rural', connected:['Mbarara Coffee Wet Mill','Banyankole Kweterana Cooperative Union'], desc:'South-western Uganda distribution. Rwanda/Burundi border trade. Dairy and coffee retail.' },
-      { lat: 1.75, lng: 33.60, name:'Soroti Regional Distribution', location:'Soroti', type:'Regional distribution', products:['Sesame','Groundnuts','Sorghum'], settlement:'rural', connected:['Soroti Soybean & Groundnut Farmers','Lira Sunflower Oil Mills'], desc:'Teso sub-region distribution. Karamoja corridor. Institutional and retail buyers.' }
-    ]
-  }
 ];
 
 const PROVENANCE = {
@@ -1233,11 +1229,11 @@ const VALUE_CHAINS = [
   // Logistics connections
   { from: 'Jinja Market', to: 'Jinja Transport Hub', color: '#8b5cf6' },
   { from: 'Mbale Central Market', to: 'Malaba Border Post', color: '#8b5cf6' },
-  // Processing → Secondary Market connections
+  // Processing → Market connections
   { from: 'Kampala Coffee Dry Mills', to: 'Kampala Export Processing Zone', color: '#ef4444' },
-  { from: 'Kampala Export Processing Zone', to: 'Busia Cross-Border Market', color: '#a855f7' },
-  { from: 'Kampala Export Processing Zone', to: 'Mbale Cross-Border Market', color: '#a855f7' },
-  { from: 'Kampala Export Processing Zone', to: 'Entebbe Lake Transport Hub', color: '#a855f7' },
+  { from: 'Kampala Export Processing Zone', to: 'Busia Cross-Border Market', color: '#ef4444' },
+  { from: 'Kampala Export Processing Zone', to: 'Mbale Cross-Border Market', color: '#ef4444' },
+  { from: 'Kampala Export Processing Zone', to: 'Entebbe Lake Transport Hub', color: '#ef4444' },
   { from: 'Kampala Coffee Dry Mills', to: 'Kampala Central Retail Hub', color: '#ef4444' },
   { from: 'Jinja Maize Millers', to: 'Busia Cross-Border Market', color: '#ef4444' },
   { from: 'Jinja Maize Millers', to: 'Kampala Central Retail Hub', color: '#ef4444' },
@@ -1302,30 +1298,33 @@ function setupSVG() {
   // Arrow marker definitions for each layer color
   const defs = svgEl.append('defs');
   const markerColors = {
-    'green':   '#22c55e',
-    'amber':   '#f59e0b',
-    'blue':    '#3b82f6',
-    'dkgreen': '#1a7f5a',
-    'orange':  '#f97316',
-    'purple':  '#8b5cf6',
-    'red':     '#ef4444',
-    'violet':  '#a855f7',
-    'gray':    '#6b7280',
+    'green':   '#22c55e', 'amber':   '#f59e0b', 'blue':    '#3b82f6',
+    'dkgreen': '#1a7f5a', 'orange':  '#f97316', 'purple':  '#8b5cf6',
+    'red':     '#ef4444', 'violet':  '#a855f7', 'gray':    '#6b7280',
     'gold':    '#FFD700'
   };
   Object.entries(markerColors).forEach(([name, color]) => {
     defs.append('marker')
       .attr('id', `arrow-${name}`)
       .attr('viewBox', '0 0 12 8')
-      .attr('refX', 11)
-      .attr('refY', 4)
-      .attr('markerWidth', 12)
-      .attr('markerHeight', 8)
+      .attr('refX', 11).attr('refY', 4)
+      .attr('markerWidth', 12).attr('markerHeight', 8)
       .attr('orient', 'auto')
-      .append('path')
-        .attr('d', 'M0,0 L12,4 L0,8 L3,4 Z')
-        .attr('fill', color)
-        .attr('fill-opacity', 1);
+      .append('path').attr('d', 'M0,0 L12,4 L0,8 L3,4 Z').attr('fill', color);
+    defs.append('marker')
+      .attr('id', `arrow-start-${name}`)
+      .attr('viewBox', '0 0 8 6')
+      .attr('refX', 1).attr('refY', 3)
+      .attr('markerWidth', 8).attr('markerHeight', 6)
+      .attr('orient', 'auto')
+      .append('path').attr('d', 'M0,3 L8,0 L8,6 Z').attr('fill', color).attr('fill-opacity', 0.6);
+    defs.append('marker')
+      .attr('id', `arrow-mid-${name}`)
+      .attr('viewBox', '0 0 8 6')
+      .attr('refX', 4).attr('refY', 3)
+      .attr('markerWidth', 8).attr('markerHeight', 6)
+      .attr('orient', 'auto')
+      .append('path').attr('d', 'M0,3 L8,0 L8,6 Z').attr('fill', color).attr('fill-opacity', 0.5);
   });
 
   gMain = svgEl.append('g').attr('id', 'g-main');
@@ -1488,7 +1487,6 @@ function renderConnections() {
     const toPos = projection([toNode.lng, toNode.lat]);
     if (!fromPos || !toPos) return;
 
-    // Curved path with control point offset for visual separation
     const mx = (fromPos[0] + toPos[0]) / 2;
     const my = (fromPos[1] + toPos[1]) / 2;
     const dx = toPos[0] - fromPos[0];
@@ -1499,7 +1497,11 @@ function renderConnections() {
     const cy = my + dx / len * offset;
 
     const markerName = colorToMarker(conn.color);
-    const pathD = `M${fromPos[0]},${fromPos[1]} Q${cx},${cy} ${toPos[0]},${toPos[1]}`;
+    const pmx = 0.25*fromPos[0] + 0.5*cx + 0.25*toPos[0];
+    const pmy = 0.25*fromPos[1] + 0.5*cy + 0.25*toPos[1];
+    const c1x = (fromPos[0]+cx)/2, c1y = (fromPos[1]+cy)/2;
+    const c2x = (cx+toPos[0])/2, c2y = (cy+toPos[1])/2;
+    const pathD = `M${fromPos[0]},${fromPos[1]} Q${c1x},${c1y} ${pmx},${pmy} Q${c2x},${c2y} ${toPos[0]},${toPos[1]}`;
 
     gConnections.append('path')
       .attr('class', 'connection-line')
@@ -1507,6 +1509,8 @@ function renderConnections() {
       .attr('stroke', conn.color)
       .attr('stroke-width', 2.5)
       .attr('stroke-opacity', 0.75)
+      .attr('marker-start', `url(#arrow-start-${markerName})`)
+      .attr('marker-mid', `url(#arrow-mid-${markerName})`)
       .attr('marker-end', `url(#arrow-${markerName})`)
       .attr('data-from', conn.from)
       .attr('data-to', conn.to);
@@ -1791,7 +1795,11 @@ function highlightPathway(nodeName) {
     const cy = my + dx / len * offset;
 
     const markerName = colorToMarker(conn.color);
-    const pathD = `M${fromPos[0]},${fromPos[1]} Q${cx},${cy} ${toPos[0]},${toPos[1]}`;
+    const pmx = 0.25*fromPos[0] + 0.5*cx + 0.25*toPos[0];
+    const pmy = 0.25*fromPos[1] + 0.5*cy + 0.25*toPos[1];
+    const c1x = (fromPos[0]+cx)/2, c1y = (fromPos[1]+cy)/2;
+    const c2x = (cx+toPos[0])/2, c2y = (cy+toPos[1])/2;
+    const pathD = `M${fromPos[0]},${fromPos[1]} Q${c1x},${c1y} ${pmx},${pmy} Q${c2x},${c2y} ${toPos[0]},${toPos[1]}`;
 
     gHighlights.append('path')
       .attr('class', 'highlight-line')
@@ -1799,6 +1807,8 @@ function highlightPathway(nodeName) {
       .attr('stroke', conn.color)
       .attr('stroke-width', 4)
       .attr('stroke-opacity', 0.85)
+      .attr('marker-start', `url(#arrow-start-${markerName})`)
+      .attr('marker-mid', `url(#arrow-mid-${markerName})`)
       .attr('marker-end', `url(#arrow-${markerName})`);
   });
 
@@ -1967,7 +1977,7 @@ function buildLegend() {
     { label: 'Producers / Farmers', color: '#22c55e', cls: 'circle' },
     { label: 'Aggregation & Bulking', color: '#f59e0b', cls: 'diamond' },
     { label: 'Warehouses / Storage', color: '#3b82f6', cls: 'square' },
-    { label: 'Primary Markets', color: '#1a7f5a', cls: 'circle-lg' },
+    { label: 'Markets', color: '#1a7f5a', cls: 'circle-lg' },
     { label: 'Traders / Off-takers', color: '#f97316', cls: 'triangle' },
     { label: 'Logistics Hubs', color: '#8b5cf6', cls: 'hexagon' },
     { label: 'Processing Facilities', color: '#ef4444', cls: 'star' },
