@@ -995,16 +995,6 @@ const LAYER_CONFIG = [
       { lat: -0.60, lng: 30.66, name:'Mbarara Regional Distribution', location:'Mbarara', type:'Regional distribution', products:['Coffee','Tea','Milk'], settlement:'rural', connected:['Mbarara Coffee Wet Mill','Banyankole Kweterana Cooperative Union'], desc:'South-western Uganda distribution. Rwanda/Burundi border trade. Dairy and coffee retail.' },
       { lat: 1.75, lng: 33.60, name:'Soroti Regional Distribution', location:'Soroti', type:'Regional distribution', products:['Sesame','Groundnuts','Sorghum'], settlement:'rural', connected:['Soroti Soybean & Groundnut Farmers','Lira Sunflower Oil Mills'], desc:'Teso sub-region distribution. Karamoja corridor. Institutional and retail buyers.' }
     ]
-  },
-  { id: 'lakes', label: 'Lakes & Water', color: '#60a5fa', count: 5, defaultOn: true,
-    lakes: true,
-    features: [
-      { name:'Lake Victoria', coords:[[-0.05,32.50],[-0.10,32.60],[-0.25,32.75],[-0.40,32.85],[-0.50,33.00],[-0.55,33.10],[-0.55,33.20],[-0.50,33.25],[-0.40,33.25],[-0.30,33.15],[-0.20,33.05],[-0.10,32.95],[0.00,32.90],[0.05,32.80],[0.10,32.70],[0.05,32.55],[-0.05,32.50]], desc:'Africa largest lake. Major fisheries and transport route. Shared with Kenya/Tanzania.' },
-      { name:'Lake Albert', coords:[[2.20,30.85],[2.10,30.95],[1.95,31.05],[1.80,31.15],[1.65,31.25],[1.50,31.30],[1.40,31.25],[1.35,31.15],[1.40,31.00],[1.55,30.90],[1.70,30.85],[1.90,30.82],[2.10,30.82],[2.20,30.85]], desc:'Western Uganda border lake. Albertine Rift fisheries. Oil exploration area.' },
-      { name:'Lake Kyoga', coords:[[1.50,32.80],[1.60,32.90],[1.70,33.00],[1.65,33.10],[1.55,33.15],[1.40,33.10],[1.30,33.00],[1.25,32.90],[1.30,32.82],[1.40,32.78],[1.50,32.80]], desc:'Central Uganda lake. Nile perch fisheries. Irrigation source for Lango Teso.' },
-      { name:'Lake Edward', coords:[[-0.05,29.55],[-0.10,29.65],[-0.15,29.75],[-0.18,29.85],[-0.15,29.95],[-0.10,30.00],[-0.02,30.00],[0.05,29.95],[0.08,29.85],[0.05,29.70],[0.00,29.60],[-0.05,29.55]], desc:'Queen Elizabeth National Park lake. Fisheries and tourism.' },
-      { name:'Lake George', coords:[[-0.25,30.05],[-0.30,30.10],[-0.35,30.15],[-0.38,30.20],[-0.35,30.28],[-0.30,30.30],[-0.22,30.28],[-0.18,30.22],[-0.18,30.15],[-0.20,30.10],[-0.25,30.05]], desc:'Queen Elizabeth National Park. Connected to Lake Edward via Kazinga Channel.' }
-    ]
   }
 ];
 
@@ -1501,38 +1491,6 @@ function renderRoads() {
 
 // ─── RENDER LAKES ────────────────────────────────────────────────────
 
-function renderLakes() {
-  const lakeLayer = LAYER_CONFIG.find(l => l.id === 'lakes');
-  if (!lakeLayer || !lakeLayer.features) return;
-
-  const gLakes = gMain.append('g').attr('id', 'g-lakes');
-
-  lakeLayer.features.forEach(lake => {
-    const lineGen = d3.line()
-      .x(d => projection([d[1], d[0]])[0])
-      .y(d => projection([d[1], d[0]])[1])
-      .curve(d3.curveCardinalClosed.tension(0.5));
-
-    gLakes.append('path')
-      .attr('class', 'lake-path')
-      .attr('d', lineGen(lake.coords))
-      .attr('fill', '#b3d4f5')
-      .attr('fill-opacity', 0.5)
-      .attr('stroke', '#6ba3d6')
-      .attr('stroke-width', 1)
-      .attr('stroke-opacity', 0.7)
-      .attr('data-layer', 'lakes')
-      .style('cursor', 'pointer')
-      .on('mouseover', function() {
-        d3.select(this).attr('fill-opacity', 0.7);
-        showTooltip(lake.name + ': ' + lake.desc, d3.event || event);
-      })
-      .on('mouseout', function() {
-        d3.select(this).attr('fill-opacity', 0.5);
-        hideTooltip();
-      });
-  });
-}
 
 // ─── RENDER TOWNS ────────────────────────────────────────────────────
 
@@ -1801,10 +1759,6 @@ function buildLegend() {
 function toggleLayer(id, on) {
   if (id === 'roads') {
     gConnections.selectAll('.road-line').style('display', on ? null : 'none');
-    return;
-  }
-  if (id === 'lakes') {
-    d3.selectAll('.lake-path').style('display', on ? null : 'none');
     return;
   }
   gNodes.selectAll(`.node-group[data-layer="${id}"]`).style('display', on ? null : 'none');
@@ -2208,7 +2162,6 @@ d3.json('districts.geojson')
     renderDistricts(data);
     renderConnections();
     renderRoads();
-    renderLakes();
     renderNodes();
     buildSidebar();
     buildRegionsPanel();
