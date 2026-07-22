@@ -1,11 +1,2341 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="refresh" content="0;url=map.html">
-<title>Uganda AgriValue Chain</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Uganda Agricultural Value Chain Map — UCDA, FAO, AFEX, UWRSA, Farmgain Africa</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;0,9..144,800;1,9..144,400;1,9..144,500&display=swap" rel="stylesheet">
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<style>
+:root {
+  --primary: #228B22;
+  --primary-dark: #1B4332;
+  --accent: #40916C;
+  --bg: #F5F5E8;
+  --surface: #FFFFFF;
+  --surface-hover: #F0F0E4;
+  --border: #D8E2DC;
+  --text: #1B4332;
+  --text-secondary: #52796F;
+  --text-dim: #7DA08F;
+  --shadow-sm: 0 1px 3px rgba(27,67,50,0.08);
+  --shadow-md: 0 4px 12px rgba(27,67,50,0.1);
+  --shadow-lg: 0 8px 30px rgba(27,67,50,0.12);
+  --radius: 10px;
+  --radius-sm: 6px;
+  --panel-width: 340px;
+  --transition: 0.3s cubic-bezier(0.4,0,0.2,1);
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; overflow: hidden; font-family: 'Fraunces', Georgia, serif; background: #F5F5E8; }
+
+/* ─── MAP ─────────────────────────────────────────────────────────────── */
+#map-container {
+  position: absolute;
+  top: 56px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1;
+  background: #E8E8DA;
+  transition: left var(--transition);
+  overflow: hidden;
+  border: 3px solid #D8E2DC;
+}
+#map-container.panel-open { left: var(--panel-width); }
+#map-container svg { width: 100%; height: 100%; display: block; shape-rendering: geometricPrecision; text-rendering: optimizeLegibility; }
+.district-path {
+  stroke: rgba(0,0,0,0.2);
+  stroke-width: 0.8px;
+  cursor: pointer;
+  transition: fill-opacity 0.15s;
+}
+.district-path:hover {
+  fill-opacity: 0.85;
+  stroke: rgba(0,0,0,0.5);
+  stroke-width: 1.5px;
+}
+.district-path.selected {
+  stroke: var(--primary);
+  stroke-width: 2.5px;
+}
+.connection-line {
+  fill: none;
+  stroke-linecap: round;
+}
+.highlight-line {
+  fill: none;
+  stroke-linecap: round;
+  pointer-events: none;
+}
+.highlight-ring {
+  pointer-events: none;
+}
+.node-group { cursor: pointer; }
+.node-group:hover .node-shape { filter: none; }
+.node-label {
+  font-family: 'Fraunces', Georgia, serif;
+  font-size: 9px;
+  font-weight: 600;
+  fill: var(--text);
+  text-anchor: middle;
+  pointer-events: none;
+  text-shadow: 0 1px 3px rgba(255,255,255,0.9), 0 0px 1px rgba(255,255,255,1);
+}
+
+/* ─── TOOLTIP ─────────────────────────────────────────────────────────── */
+.map-tooltip {
+  position: absolute;
+  z-index: 2000;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 8px 12px;
+  font-size: 12px;
+  font-family: 'Fraunces', Georgia, serif;
+  box-shadow: var(--shadow-md);
+  pointer-events: none;
+  display: none;
+  max-width: 220px;
+}
+.map-tooltip .tt-name { font-weight: 600; color: var(--text); margin-bottom: 2px; }
+.map-tooltip .tt-detail { color: var(--text-secondary); font-size: 11px; line-height: 1.4; }
+
+/* ─── TOP BAR ─────────────────────────────────────────────────────────── */
+.topbar {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 56px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  z-index: 1100;
+  gap: 12px;
+  box-shadow: var(--shadow-sm);
+}
+.topbar-brand { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+.topbar-brand .logo {
+  width: 36px; height: 36px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.topbar-brand .title { font-size: 17px; font-weight: 700; color: var(--text); white-space: nowrap; font-family: 'Fraunces', serif; letter-spacing: -0.3px; }
+.topbar-brand .title span { color: var(--primary); }
+.topbar-search { flex: 1; max-width: 400px; position: relative; }
+.topbar-search input {
+  width: 100%;
+  padding: 8px 12px 8px 36px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 13px;
+  font-family: 'Fraunces', Georgia, serif;
+  background: var(--surface);
+  color: var(--text);
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.topbar-search input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(34,139,34,0.12); }
+.topbar-search input::placeholder { color: var(--text-dim); }
+.topbar-search .search-icon {
+  position: absolute; left: 11px; top: 50%; transform: translateY(-50%);
+  color: var(--text-dim); font-size: 14px; pointer-events: none;
+}
+.topbar-search .search-hint {
+  position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+  font-size: 10px; color: var(--text-dim);
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 4px; padding: 1px 6px; pointer-events: none;
+}
+.topbar-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.topbar-btn {
+  display: flex; align-items: center; gap: 6px;
+  padding: 7px 14px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text-secondary);
+  font-size: 12px; font-weight: 500;
+  font-family: 'Fraunces', Georgia, serif;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.topbar-btn:hover { border-color: var(--primary); color: var(--primary); background: rgba(34,139,34,0.06); }
+.topbar-btn.active { border-color: var(--primary); color: #fff; background: var(--primary); }
+.topbar-btn svg { width: 14px; height: 14px; }
+
+/* ─── PANEL ───────────────────────────────────────────────────────────── */
+.panel {
+  position: absolute;
+  top: 56px; left: 0;
+  width: var(--panel-width);
+  bottom: 0;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  z-index: 1050;
+  display: flex;
+  flex-direction: column;
+  transform: translateX(-100%);
+  transition: transform var(--transition);
+  box-shadow: var(--shadow-lg);
+}
+.panel.open { transform: translateX(0); }
+.panel-scroll { flex: 1; overflow-y: auto; padding: 0; }
+.panel-scroll::-webkit-scrollbar { width: 4px; }
+.panel-scroll::-webkit-scrollbar-track { background: transparent; }
+.panel-scroll::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+.panel-section { border-bottom: 1px solid var(--border); }
+.panel-section-header { padding: 14px 16px 10px; }
+.panel-section-header h3 {
+  font-size: 11px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.8px;
+  color: var(--text-dim); margin-bottom: 2px;
+}
+.panel-section-header p { font-size: 13px; color: var(--text); line-height: 1.5; }
+.panel-section-body { padding: 0 16px 14px; }
+.basemap-row { display: flex; gap: 6px; }
+.basemap-btn {
+  flex: 1; padding: 8px 0; text-align: center;
+  font-size: 12px; font-weight: 600;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: 'Fraunces', Georgia, serif;
+}
+.basemap-btn.active { border-color: var(--primary); color: var(--primary); background: rgba(34,139,34,0.08); }
+.basemap-btn:hover { border-color: var(--primary); }
+.layer-list { display: flex; flex-direction: column; gap: 2px; }
+.layer-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.layer-row:hover { background: var(--surface-hover); }
+.layer-row input[type="checkbox"] {
+  appearance: none; -webkit-appearance: none;
+  width: 16px; height: 16px;
+  border: 2px solid var(--border);
+  border-radius: 4px;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all 0.15s;
+  position: relative;
+}
+.layer-row input[type="checkbox"]:checked { border-color: var(--primary); background: var(--primary); }
+.layer-row input[type="checkbox"]:checked::after {
+  content: '✓'; position: absolute; top: -1px; left: 2px;
+  font-size: 11px; color: #fff; font-weight: 700;
+}
+.layer-icon {
+  width: 24px; height: 24px;
+  border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.layer-info { flex: 1; min-width: 0; }
+.layer-name { font-size: 13px; font-weight: 500; color: var(--text); }
+.layer-count { font-size: 11px; color: var(--text-dim); }
+.commodity-select {
+  width: 100%;
+  padding: 9px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-family: 'Fraunces', Georgia, serif;
+  color: var(--text);
+  background: var(--surface);
+  outline: none; cursor: pointer;
+  transition: border-color 0.2s;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%237DA08F' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  padding-right: 30px;
+}
+.commodity-select:focus { border-color: var(--primary); }
+.commodity-select option { background: var(--surface); color: var(--text); }
+
+/* ─── INFO PANEL ──────────────────────────────────────────────────────── */
+#info-panel {
+  position: absolute;
+  bottom: 20px; right: 20px;
+  z-index: 1000;
+  width: 360px;
+  max-height: 55vh;
+  background: var(--surface);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-lg);
+  display: none;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+#info-panel.visible { display: flex; }
+.info-header {
+  padding: 16px 18px 12px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: flex-start; justify-content: space-between;
+}
+.info-header h2 { font-size: 16px; font-weight: 600; color: var(--text); font-family: 'Fraunces', serif; }
+.info-close {
+  background: none; border: none;
+  font-size: 20px; cursor: pointer;
+  color: var(--text-dim); line-height: 1;
+  padding: 0 4px; border-radius: 4px;
+  transition: all 0.15s;
+}
+.info-close:hover { color: var(--text); background: var(--surface-hover); }
+.info-body { padding: 14px 18px 18px; overflow-y: auto; }
+.info-body .detail-row { font-size: 13px; color: var(--text-secondary); margin: 5px 0; line-height: 1.5; }
+.info-body .detail-row strong { color: var(--text); }
+.info-body .section-label {
+  font-size: 10px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.8px;
+  color: var(--text-dim); margin: 14px 0 6px;
+}
+.pathway-flow {
+  display: flex; align-items: center; flex-wrap: wrap; gap: 4px;
+  margin: 8px 0; padding: 10px 12px;
+  background: var(--bg);
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+}
+.pathway-step {
+  padding: 4px 10px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
+}
+.pathway-step.active { border-color: var(--primary); background: rgba(34,139,34,0.1); color: var(--primary); }
+.pathway-arrow { color: var(--text-dim); font-size: 14px; }
+.type-badge {
+  display: inline-block;
+  font-size: 10px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.5px;
+  padding: 3px 10px; border-radius: 5px;
+  color: #fff; margin-bottom: 10px;
+}
+
+/* ─── BADGE (hidden) ──────────────────────────────────────────────── */
+.sample-badge { display: none; }
+
+/* ─── MAP TITLE OVERLAY ───────────────────────────────────────────────── */
+.map-title-overlay {
+  position: absolute;
+  bottom: 20px; left: 50%; transform: translateX(-50%);
+  z-index: 999;
+  background: rgba(255,255,255,0.95);
+  color: var(--text);
+  padding: 10px 24px;
+  border-radius: 12px;
+  font-size: 14px; font-weight: 500;
+  font-family: 'Fraunces', Georgia, serif;
+  pointer-events: none;
+  white-space: nowrap;
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--border);
+}
+.map-title-overlay span { color: var(--primary); font-weight: 700; }
+
+/* ─── ZOOM CONTROLS ───────────────────────────────────────────────────── */
+.zoom-controls {
+  position: absolute;
+  top: 72px; right: 16px;
+  z-index: 999;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.zoom-btn {
+  width: 36px; height: 36px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  font-size: 18px; font-weight: 600;
+  color: var(--text-secondary);
+  transition: all 0.15s;
+  font-family: 'Fraunces', Georgia, serif;
+}
+.zoom-btn:first-child { border-radius: var(--radius-sm) var(--radius-sm) 0 0; }
+.zoom-btn:last-child { border-radius: 0 0 var(--radius-sm) var(--radius-sm); }
+.zoom-btn:hover { background: var(--surface-hover); color: var(--primary); }
+
+/* ─── LEGEND ──────────────────────────────────────────────────────────── */
+.legend-item {
+  display: flex; align-items: center; gap: 10px;
+  font-size: 12px; padding: 4px 0; color: var(--text-secondary);
+}
+.legend-symbol {
+  width: 20px;
+  display: flex;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* ─── LOADING ─────────────────────────────────────────────────────────── */
+.map-loading {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 2000;
+  background: var(--surface);
+  padding: 24px 36px;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-lg);
+  text-align: center;
+  font-family: 'Fraunces', Georgia, serif;
+  border: 1px solid var(--border);
+}
+.map-loading .spinner {
+  width: 36px; height: 36px;
+  border: 3px solid var(--border);
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin: 0 auto 12px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.map-loading p { font-size: 13px; color: var(--text-secondary); font-weight: 500; }
+
+/* ─── REGIONS PANEL (RIGHT SIDE) ──────────────────────────────────────── */
+.regions-panel {
+  position: absolute;
+  top: 56px; right: 0;
+  width: 320px;
+  bottom: 0;
+  background: var(--surface);
+  border-left: 1px solid var(--border);
+  z-index: 1050;
+  display: flex;
+  flex-direction: column;
+  transform: translateX(100%);
+  transition: transform var(--transition);
+  box-shadow: var(--shadow-lg);
+}
+.regions-panel.open { transform: translateX(0); }
+.regions-header {
+  padding: 14px 16px 10px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.regions-header h3 {
+  font-size: 11px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.8px;
+  color: var(--text-dim);
+}
+.regions-close {
+  background: none; border: none; font-size: 16px; cursor: pointer;
+  color: var(--text-dim); padding: 2px 6px; border-radius: 4px;
+  transition: all 0.15s;
+}
+.regions-close:hover { color: var(--text); background: var(--surface-hover); }
+.regions-scroll { flex: 1; overflow-y: auto; padding: 12px; }
+.regions-scroll::-webkit-scrollbar { width: 4px; }
+.regions-scroll::-webkit-scrollbar-track { background: transparent; }
+.regions-scroll::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+.region-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px;
+  margin-bottom: 10px;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+  overflow: hidden;
+}
+.region-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  width: 4px; height: 100%;
+  border-radius: var(--radius) 0 0 var(--radius);
+}
+.region-card:hover {
+  border-color: var(--primary);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
+  background: var(--surface-hover);
+}
+.region-card.active {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px rgba(34,139,34,0.15);
+}
+.region-card-header {
+  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 10px;
+}
+.region-card-dot {
+  width: 12px; height: 12px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  border: 2px solid #fff;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+.region-card-name {
+  font-size: 14px; font-weight: 600;
+  color: var(--text);
+  font-family: 'Fraunces', serif;
+}
+.region-card-badge {
+  margin-left: auto;
+  font-size: 10px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.5px;
+  padding: 2px 8px; border-radius: 10px;
+  color: #fff;
+}
+.region-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.region-stat {
+  background: var(--bg);
+  border-radius: var(--radius-sm);
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+}
+.region-stat-value {
+  font-size: 16px; font-weight: 700;
+  color: var(--text);
+}
+.region-stat-label {
+  font-size: 10px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.5px;
+  color: var(--text-dim);
+  margin-top: 1px;
+}
+.region-card-commodities {
+  margin-top: 10px;
+  display: flex; flex-wrap: wrap; gap: 4px;
+}
+.region-commodity-tag {
+  font-size: 10px; font-weight: 600;
+  padding: 2px 8px; border-radius: 10px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+}
+.region-card-nodes {
+  margin-top: 10px;
+  border-top: 1px solid var(--border);
+  padding-top: 8px;
+}
+.region-card-nodes-title {
+  font-size: 10px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.5px;
+  color: var(--text-dim);
+  margin-bottom: 6px;
+}
+.region-node-row {
+  display: flex; align-items: center; gap: 6px;
+  padding: 3px 0;
+  font-size: 11px; color: var(--text-secondary);
+}
+.region-node-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.region-zoom-hint {
+  font-size: 10px; color: var(--text-dim);
+  margin-top: 8px;
+  text-align: center;
+  font-style: italic;
+}
+
+/* ─── RESPONSIVE ──────────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  :root { --panel-width: 100%; }
+  .topbar-brand .title { display: none; }
+  .topbar-search { max-width: none; }
+  .topbar-btn span { display: none; }
+  .panel { width: 100%; }
+  #info-panel { width: calc(100% - 20px); right: 10px; bottom: 10px; max-height: 40vh; }
+  .sample-badge { top: 68px; right: 8px; font-size: 8px; padding: 3px 10px; }
+  .map-title-overlay { font-size: 11px; padding: 8px 16px; bottom: 12px; }
+  .regions-panel { width: 100%; }
+}
+/* ─── WELCOME OVERLAY ──────────────────────────────────────────────── */
+.welcome-overlay {
+  position: fixed; inset: 0; z-index: 10000;
+  background: rgba(27,67,50,0.65);
+  display: flex; align-items: center; justify-content: center;
+  opacity: 1; transition: opacity 0.4s ease;
+}
+.welcome-overlay.hidden { opacity: 0; pointer-events: none; }
+.welcome-card {
+  background: var(--surface);
+  border-radius: 16px;
+  padding: 40px 44px;
+  max-width: 520px; width: 90%;
+  box-shadow: 0 20px 60px rgba(27,67,50,0.25);
+  text-align: center;
+  font-family: 'Fraunces', Georgia, serif;
+}
+.welcome-card h1 {
+  font-size: 24px; font-weight: 800;
+  color: var(--text);
+  margin-bottom: 6px;
+  line-height: 1.2;
+}
+.welcome-card .subtitle {
+  font-size: 13px; color: var(--text-secondary);
+  margin-bottom: 28px;
+  line-height: 1.5;
+}
+.welcome-steps {
+  display: flex; gap: 16px;
+  margin-bottom: 28px;
+  text-align: left;
+}
+.welcome-step {
+  flex: 1;
+  background: var(--bg);
+  border-radius: 12px;
+  padding: 16px 14px;
+  border: 1px solid var(--border);
+}
+.welcome-step-num {
+  width: 28px; height: 28px;
+  background: var(--primary);
+  color: #fff;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 700;
+  margin-bottom: 10px;
+}
+.welcome-step h3 {
+  font-size: 13px; font-weight: 700;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+.welcome-step p {
+  font-size: 11px; color: var(--text-secondary);
+  line-height: 1.4;
+  font-family: 'Fraunces', Georgia, serif;
+}
+.welcome-btn {
+  background: var(--primary);
+  color: #fff;
+  border: none;
+  padding: 12px 36px;
+  border-radius: 10px;
+  font-size: 15px; font-weight: 700;
+  cursor: pointer;
+  font-family: 'Fraunces', Georgia, serif;
+  transition: background 0.2s;
+  letter-spacing: 0.3px;
+}
+.welcome-btn:hover { background: var(--primary-dark); }
+.welcome-sources {
+  margin-top: 18px;
+  font-size: 10px; color: var(--text-dim);
+  letter-spacing: 0.3px;
+}
+
+/* ─── GETTING STARTED PANEL ────────────────────────────────────────── */
+.getting-started {
+  background: linear-gradient(135deg, #f0f7f0, #e8f0e8);
+  border: 1px solid #c8dcc8;
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  margin-bottom: 12px;
+  cursor: pointer;
+  transition: padding 0.2s;
+}
+.getting-started.collapsed .gs-step { display: none; }
+.getting-started.collapsed { padding: 10px 16px; }
+.getting-started h4 {
+  font-size: 12px; font-weight: 700;
+  color: var(--primary-dark);
+  margin-bottom: 10px;
+  display: flex; align-items: center; gap: 6px;
+}
+.getting-started.collapsed h4 { margin-bottom: 0; }
+.getting-started h4 .collapse-arrow {
+  margin-left: auto;
+  font-size: 10px;
+  color: var(--text-dim);
+  transition: transform 0.2s;
+}
+.getting-started.collapsed h4 .collapse-arrow { transform: rotate(-90deg); }
+.gs-step {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 6px 0;
+}
+.gs-step-num {
+  width: 20px; height: 20px;
+  background: var(--primary);
+  color: #fff;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px; font-weight: 700;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+.gs-step-text {
+  font-size: 12px; color: var(--text-secondary);
+  line-height: 1.5;
+}
+.gs-step-text strong { color: var(--text); }
+
+/* ─── TRUST BAR ───────────────────────────────────────────────────── */
+.trust-bar {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  z-index: 998;
+  background: rgba(255,255,255,0.92);
+  border-top: 1px solid var(--border);
+  padding: 8px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  font-size: 10px;
+  color: var(--text-dim);
+  transition: transform 0.3s ease;
+}
+.trust-bar.hidden { transform: translateY(100%); }
+.trust-bar-item {
+  display: flex; align-items: center; gap: 5px;
+}
+.trust-dot {
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: var(--primary);
+}
+.trust-bar a {
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.15s;
+}
+.trust-bar a:hover { color: var(--primary); }
+
+/* ─── MAP HINT PULSE ──────────────────────────────────────────────── */
+.map-hint {
+  position: absolute;
+  bottom: 48px; left: 50%;
+  transform: translateX(-50%);
+  z-index: 997;
+  background: rgba(255,255,255,0.95);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 8px 18px;
+  font-size: 12px; font-weight: 500;
+  color: var(--text-secondary);
+  display: flex; align-items: center; gap: 8px;
+  box-shadow: var(--shadow-md);
+  transition: opacity 0.4s;
+  pointer-events: none;
+}
+.map-hint.hidden { opacity: 0; }
+.map-hint-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--primary);
+  animation: hint-pulse 2s ease-in-out infinite;
+}
+@keyframes hint-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(1.5); }
+}
+
+</style>
 </head>
 <body>
-<p>Redirecting to <a href="map.html">Uganda AgriValue Chain Map</a>...</p>
+
+<!-- WELCOME OVERLAY -->
+<div class="welcome-overlay" id="welcome-overlay">
+  <div class="welcome-card">
+    <h1>Uganda AgriValue Chain</h1>
+    <div class="subtitle">Interactive district map of agricultural cooperatives, warehouses, markets, and traders across Uganda</div>
+    <div class="welcome-steps">
+      <div class="welcome-step">
+        <div class="welcome-step-num">1</div>
+        <h3>Toggle Layers</h3>
+        <p>Use the left panel to show or hide producers, warehouses, markets, and more</p>
+      </div>
+      <div class="welcome-step">
+        <div class="welcome-step-num">2</div>
+        <h3>Click a Node</h3>
+        <p>Click any dot on the map to see details and trace its value-chain pathway</p>
+      </div>
+      <div class="welcome-step">
+        <div class="welcome-step-num">3</div>
+        <h3>Follow the Chain</h3>
+        <p>Connections light up showing how goods flow from farmer to market</p>
+      </div>
+    </div>
+    <button class="welcome-btn" onclick="dismissWelcome()">Explore the Map</button>
+    <div class="welcome-sources">Data verified from UCDA, ESAFF, AFEX, Farmgain Africa, UWRSA &middot; July 2026</div>
+  </div>
+</div>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="topbar-brand">
+    <div class="logo"><img src="coat-of-arms.png" alt="Uganda Coat of Arms" style="width:28px;height:28px;object-fit:contain;"></div>
+    <div class="title">Uganda <span>AgriValue</span> Chain</div>
+  </div>
+  <div class="topbar-search">
+    <span class="search-icon">&#128269;</span>
+    <input type="text" id="search-input" placeholder="Search locations, nodes..." onkeyup="if(event.key==='Enter')searchNode()">
+    <span class="search-hint">Enter</span>
+  </div>
+  <div class="topbar-actions">
+    <button class="topbar-btn active" id="btn-panel" onclick="togglePanel()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18"/></svg>
+      <span>Layers</span>
+    </button>
+    <button class="topbar-btn" id="btn-regions" onclick="toggleRegionsPanel()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      <span>Regions</span>
+    </button>
+    <button class="topbar-btn" onclick="resetView()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+      <span>Reset</span>
+    </button>
+  </div>
+</div>
+
+<!-- PANEL -->
+<div class="panel open" id="panel">
+  <div class="panel-scroll">
+    <div class="getting-started" id="getting-started" onclick="this.classList.toggle('collapsed')">
+      <h4><span style="font-size:14px;">&#9654;</span> How to use this map <span class="collapse-arrow">&#9660;</span></h4>
+      <div class="gs-step">
+        <div class="gs-step-num">1</div>
+        <div class="gs-step-text"><strong>Toggle layers</strong> on/off using the checkboxes below to focus on what matters</div>
+      </div>
+      <div class="gs-step">
+        <div class="gs-step-num">2</div>
+        <div class="gs-step-text"><strong>Click any dot</strong> on the map to see its details, connections, and supply chain</div>
+      </div>
+      <div class="gs-step">
+        <div class="gs-step-num">3</div>
+        <div class="gs-step-text"><strong>Follow the lines</strong> to trace how goods flow from farmer to buyer</div>
+      </div>
+    </div>
+    <div class="panel-section">
+      <div class="panel-section-header"><h3>Map Layers</h3><p>Toggle data layers on and off</p></div>
+      <div class="panel-section-body"><div class="layer-list" id="layer-toggles"></div></div>
+    </div>
+    <div class="panel-section">
+      <div class="panel-section-header"><h3>Filter by Commodity</h3></div>
+      <div class="panel-section-body">
+        <select class="commodity-select" id="commodity-filter" onchange="filterByCommodity()">
+          <option value="">🌾 All Commodities</option>
+          <option value="Coffee">☕ Coffee</option>
+          <option value="Maize">🌽 Maize</option>
+          <option value="Beans">🫘 Beans</option>
+          <option value="Sesame">🪴 Sesame</option>
+          <option value="Cassava">🥔 Cassava</option>
+          <option value="Groundnuts">🥜 Groundnuts</option>
+          <option value="Sunflower">🌻 Sunflower</option>
+          <option value="Cotton">🧵 Cotton</option>
+          <option value="Sorghum">🌾 Sorghum</option>
+          <option value="Tea">🍵 Tea</option>
+          <option value="Bananas">🍌 Bananas</option>
+          <option value="Livestock">🐄 Livestock</option>
+          <option value="Vegetables">🥬 Vegetables</option>
+          <option value="Grains">🌾 Grains</option>
+          <option value="Mixed">🌿 Mixed</option>
+        </select>
+      </div>
+    </div>
+    <div class="panel-section">
+      <div class="panel-section-header"><h3>Legend</h3></div>
+      <div class="panel-section-body" id="legend"></div>
+    </div>
+  </div>
+</div>
+
+<!-- MAP -->
+<div id="map-container" class="panel-open">
+  <div class="map-title-overlay"><span>UGANDA</span> Agricultural Value Chain Map — Sources: UCDA, FAO, AFEX, UWRSA, Farmgain Africa</div>
+  <div class="map-loading" id="map-loading"><div class="spinner"></div><p>Loading district boundaries...</p></div>
+  <div class="zoom-controls">
+    <button class="zoom-btn" onclick="zoomIn()">+</button>
+    <button class="zoom-btn" onclick="zoomOut()">&#8722;</button>
+  </div>
+  <svg id="map-svg"></svg>
+  <div class="map-tooltip" id="map-tooltip"></div>
+</div>
+
+<!-- INFO PANEL -->
+<div id="info-panel">
+  <div class="info-header">
+    <h2 id="info-title">Node Details</h2>
+    <button class="info-close" onclick="closeInfoPanel()">&#10005;</button>
+  </div>
+  <div class="info-body" id="info-body"></div>
+</div>
+
+<!-- REGIONS PANEL -->
+<div class="regions-panel" id="regions-panel">
+  <div class="regions-header">
+    <h3>Regions Overview</h3>
+    <button class="regions-close" onclick="toggleRegionsPanel()">&#10005;</button>
+  </div>
+  <div class="regions-scroll" id="regions-scroll"></div>
+</div>
+
+<div class="sample-badge">VERIFIED DATA</div>
+
+<!-- TRUST BAR -->
+<div class="trust-bar" id="trust-bar">
+  <div class="trust-bar-item"><div class="trust-dot"></div> UCDA</div>
+  <div class="trust-bar-item"><div class="trust-dot"></div> ESAFF Uganda</div>
+  <div class="trust-bar-item"><div class="trust-dot"></div> AFEX</div>
+  <div class="trust-bar-item"><div class="trust-dot"></div> Farmgain Africa</div>
+  <div class="trust-bar-item"><div class="trust-dot"></div> UWRSA</div>
+  <div class="trust-bar-item" style="margin-left:8px;border-left:1px solid var(--border);padding-left:12px;">July 2026</div>
+</div>
+
+<!-- MAP HINT -->
+<div class="map-hint" id="map-hint">
+  <div class="map-hint-dot"></div>
+  Click any dot on the map to explore its value chain
+</div>
+
+<script>
+// ─── WELCOME OVERLAY ─────────────────────────────────────────────────
+function dismissWelcome() {
+  const overlay = document.getElementById('welcome-overlay');
+  overlay.classList.add('hidden');
+  setTimeout(() => overlay.style.display = 'none', 400);
+  localStorage.setItem('agrivalue_welcomed', '1');
+}
+
+function checkWelcome() {
+  if (localStorage.getItem('agrivalue_welcomed')) {
+    document.getElementById('welcome-overlay').style.display = 'none';
+  }
+}
+
+function hideMapHint() {
+  const hint = document.getElementById('map-hint');
+  if (hint) hint.classList.add('hidden');
+}
+
+function showMapHint() {
+  const hint = document.getElementById('map-hint');
+  if (hint && !localStorage.getItem('agrivalue_hint_dismissed')) {
+    hint.classList.remove('hidden');
+  }
+}
+
+// Hide hint after 8 seconds or first click, collapse getting started guide
+setTimeout(hideMapHint, 8000);
+document.addEventListener('click', function hideHintOnce(e) {
+  hideMapHint();
+  localStorage.setItem('agrivalue_hint_dismissed', '1');
+  const gs = document.getElementById('getting-started');
+  if (gs && !gs.classList.contains('collapsed')) gs.classList.add('collapsed');
+  document.removeEventListener('click', hideHintOnce);
+}, { once: true });
+
+// ─── DATA ──────────────────────────────────────────────────────────────
+
+const LAYER_CONFIG = [
+  { id: 'producers', label: 'Producers / Farmers', color: '#22c55e', count: 12, defaultOn: true,
+    markers: [
+      { lat: 1.07, lng: 34.18, name:'Bugisu Cooperative Union', village:'Mbale', crops:['Coffee'], farmers:18000, volume:3200, desc:'UCDA-certified Arabica coffee cooperative on Mt. Elgon slopes. Established 1954. ~18,000 members. ~3,200 MT/year. WRS pilot participant.' },
+      { lat: -0.15, lng: 29.98, name:'Nyakatonzi Co-operative Union', village:'Kasese/Bushenyi', crops:['Cotton','Coffee'], farmers:15000, volume:4500, desc:'Western Uganda cooperative union. 15,000+ members. ~4,500 MT/year cotton & coffee. WRS pilot participant. Soybean & sunflower diversification underway.' },
+      { lat: -0.62, lng: 30.65, name:'Banyankole Kweterana Cooperative Union', village:'Mbarara', crops:['Coffee'], farmers:5000, volume:1800, desc:'Coffee WRS-certified cooperative in south-western Uganda. ~1,800 MT/year. Certified warehouse operator.' },
+      { lat: -0.45, lng: 30.90, name:'Muhame Cooperative Society', village:'Western Uganda', crops:['Coffee'], farmers:3200, volume:1100, desc:'Coffee WRS-certified cooperative. ~1,100 MT/year. Registered warehouse operator for Robusta coffee.' },
+      { lat: 0.348, lng: 32.580, name:'NUCAFE Farmer Groups', village:'National', crops:['Coffee'], farmers:1500000, volume:120000, desc:'National Union of Coffee Agro-processors and Farmers Enterprises (est. 1995). 1.5M farmers, 200+ associations. ~120,000 MT/year. Solar-powered factory in Namanve.' },
+      { lat: 0.332, lng: 32.618, name:'ESAFF Uganda', village:'National (54 districts)', crops:['Mixed'], farmers:12588, volume:8500, desc:'Eastern & Southern Africa Small-scale Farmers Forum. 12,588 community organisations across 54 districts. ~8,500 MT/year aggregate.' },
+      { lat: 0.315, lng: 32.565, name:'NAAC', village:'National', crops:['Mixed'], farmers:500000, volume:95000, desc:'National Alliance of Agricultural Cooperatives in Uganda. Umbrella for all agri-cooperatives, 500,000+ farmers. ~95,000 MT/year aggregate.' },
+      { lat: 2.77, lng: 32.30, name:'Gulu Coffee Farmers Cooperative', village:'Gulu', crops:['Coffee','Maize'], farmers:4500, volume:2800, desc:'Northern Robusta coffee zone cooperative. ~2,800 MT/year. Major maize and coffee production area.' },
+      { lat: 1.72, lng: 33.61, name:'Soroti Soybean & Groundnut Farmers', village:'Soroti', crops:['Sesame','Groundnuts'], farmers:3800, volume:1900, desc:'Eastern region soybean and groundnut cluster. ~1,900 MT/year. Lango & Teso sub-regions.' },
+      { lat: 2.24, lng: 32.90, name:'Lira Maize & Sesame Farmers Group', village:'Lira', crops:['Maize','Sesame'], farmers:4200, volume:3500, desc:'Lango sub-region maize and sesame growers. ~3,500 MT/year. Sunflower oilseed production zone.' },
+      { lat: 3.02, lng: 30.91, name:'Arua Cassava & Bean Producers', village:'Arua', crops:['Cassava','Beans'], farmers:5200, volume:4100, desc:'West Nile region cassava and bean production. ~4,100 MT/year. Major food security zone.' },
+      { lat: 1.44, lng: 31.35, name:'Hoima Coffee Growers Cooperative', village:'Hoima', crops:['Coffee','Beans'], farmers:2800, volume:1500, desc:'Albertine region coffee and bean producers. ~1,500 MT/year. Near Lake Albert farming zone.' }
+    ]
+  },
+  { id: 'aggregation', label: 'Aggregation / Bulking', color: '#f59e0b', count: 6, defaultOn: true,
+    markers: [
+      { lat: 2.24, lng: 32.90, name:'NAAC Aggregation Hub, Lira', location:'Lira', capacity:'8,000 MT', connected:['Lira Maize & Sesame Farmers Group','Soroti Soybean & Groundnut Farmers'], desc:'National cooperative umbrella aggregation hub for Lango sub-region.' },
+      { lat: 1.72, lng: 33.61, name:'Farmgain Bulking Centre, Soroti', location:'Soroti', capacity:'6,500 MT', connected:['Soroti Soybean & Groundnut Farmers'], desc:'Market information system hub. Farmgain Africa partnership for price discovery.' },
+      { lat: 1.07, lng: 34.18, name:'Bugisu CU Grading Centre, Mbale', location:'Mbale', capacity:'10,000 MT', connected:['Bugisu Cooperative Union'], desc:'Grade sorting facility for Mt. Elgon Arabica coffee. UCDA-certified.' },
+      { lat: 0.42, lng: 33.20, name:'Jinja Aggregation Point', location:'Jinja', capacity:'7,200 MT', connected:['NUCAFE Farmer Groups'], desc:'Lake Victoria corridor aggregation for maize and beans. Busia trade route.' },
+      { lat: 1.69, lng: 31.96, name:'Masindi Bulking Shed', location:'Masindi', capacity:'8,800 MT', connected:['Gulu Coffee Farmers Cooperative'], desc:'Mid-western grain bulking for maize, cotton, and beans.' },
+      { lat: 1.44, lng: 31.35, name:'Hoima Aggregation Hub', location:'Hoima', capacity:'5,400 MT', connected:['Hoima Coffee Growers Cooperative'], desc:'Albertine region aggregation hub for coffee and beans.' }
+    ]
+  },
+  { id: 'warehouses', label: 'Warehouses / Storage', color: '#3b82f6', count: 12, defaultOn: true,
+    markers: [
+      { lat: 1.36, lng: 34.33, name:'AFEX Smart Warehouse, Bulambuli', location:'Bulambuli', capacity:'8,000 MT', occupancy:'72%', connected:['Bugisu CU Grading Centre, Mbale'], commodities:['Maize','Sorghum','Soybeans'], desc:'AFEX smart storage facility. Part of 20+ warehouses across Uganda. Digital grain management.' },
+      { lat: 1.44, lng: 31.35, name:'AFEX Smart Warehouse, Hoima', location:'Hoima', capacity:'6,000 MT', occupancy:'65%', connected:['Hoima Aggregation Hub'], commodities:['Maize','Coffee'], desc:'AFEX smart storage. Albertine corridor facility.' },
+      { lat: 0.320, lng: 32.575, name:'AFEX Smart Warehouse, Kampala', location:'Kampala', capacity:'15,000 MT', occupancy:'81%', connected:['NAAC','NUCAFE Farmer Groups'], commodities:['Mixed'], desc:'AFEX central distribution hub. National commodity exchange storage.' },
+      { lat: 1.75, lng: 32.00, name:'AFEX Smart Warehouse, Kigumba', location:'Kigumba', capacity:'10,000 MT', occupancy:'58%', connected:['Gulu Coffee Farmers Cooperative'], commodities:['Maize','Sorghum','Soybeans'], desc:'AFEX northern corridor storage facility.' },
+      { lat: 2.24, lng: 32.90, name:'AFEX Smart Warehouse, Lira', location:'Lira', capacity:'9,000 MT', occupancy:'67%', connected:['NAAC Aggregation Hub, Lira'], commodities:['Maize','Sesame','Sorghum'], desc:'AFEX Lango sub-region storage. WRS-eligible facility.' },
+      { lat: 1.69, lng: 31.96, name:'AFEX Smart Warehouse, Masindi', location:'Masindi', capacity:'8,500 MT', occupancy:'55%', connected:['Masindi Bulking Shed'], commodities:['Maize','Cotton'], desc:'AFEX mid-western grain storage.' },
+      { lat: 0.335, lng: 32.595, name:'UWRSA Certified Warehouse, Kampala', location:'Kampala', capacity:'20,000 MT', occupancy:'74%', connected:['AFEX Smart Warehouse, Kampala'], commodities:['Mixed'], desc:'Uganda Warehouse Receipt System Authority certified. Inventory credit eligible.' },
+      { lat: 0.308, lng: 32.615, name:'Afro Kai Warehouse, Kampala', location:'Kampala', capacity:'43,000 MT', occupancy:'70%', connected:['NAAC'], commodities:['Grains','Coffee'], desc:'Afro Kai Ltd. 43,000+ tonne capacity. Modern silos and ventilation systems.' },
+      { lat: 0.42, lng: 33.20, name:'Watujo Agro Produce Warehouse, Jinja', location:'Jinja', capacity:'12,000 MT', occupancy:'62%', connected:['Jinja Aggregation Point'], commodities:['Maize','Beans','Rice'], desc:'Watujo Agro Produce Ltd. Grain processing and storage for Busoga region.' },
+      { lat: 1.09, lng: 34.17, name:'AFEX Smart Warehouse, Mbale', location:'Mbale', capacity:'7,500 MT', occupancy:'68%', connected:['Bugisu CU Grading Centre, Mbale'], commodities:['Coffee','Maize'], desc:'AFEX Eastern corridor facility. Serves Mt. Elgon coffee belt.' },
+      { lat: 1.73, lng: 33.62, name:'AFEX Smart Warehouse, Soroti', location:'Soroti', capacity:'6,000 MT', occupancy:'52%', connected:['Farmgain Bulking Centre, Soroti'], commodities:['Sesame','Groundnuts','Sorghum'], desc:'AFEX Teso sub-region storage. WRS-eligible facility.' },
+      { lat: -0.61, lng: 30.66, name:'AFEX Smart Warehouse, Mbarara', location:'Mbarara', capacity:'5,500 MT', occupancy:'48%', connected:['Banyankole Kweterana Cooperative Union'], commodities:['Coffee','Tea'], desc:'AFEX South-western corridor facility. Coffee and tea storage.' }
+    ]
+  },
+  { id: 'markets', label: 'Primary Markets', color: '#1a7f5a', count: 14, defaultOn: true,
+    markers: [
+      { lat: 0.313, lng: 32.585, name:'Owino Market (St. Balikuddembe)', location:'Kampala', focus:['Mixed'], farmers:8000, traders:1500, connected:['AFEX Smart Warehouse, Kampala'], desc:'Uganda\'s largest informal market. 8,000+ vendors. Farmgain Africa coverage.' },
+      { lat: 0.337, lng: 32.607, name:'Nakawa Market, Kampala', location:'Kampala', focus:['Vegetables','Grains'], farmers:2430, traders:214, connected:['UWRSA Certified Warehouse, Kampala'], desc:'Major produce market in eastern Kampala industrial area. Farmgain Africa tracked prices.' },
+      { lat: 0.352, lng: 32.565, name:'Kalerwe Market, Kampala', location:'Kampala', focus:['Vegetables','Grains'], farmers:1800, traders:180, connected:['AFEX Smart Warehouse, Kampala'], desc:'Major vegetable and grain market in northern Kampala (Kyanja area).' },
+      { lat: 2.77, lng: 32.30, name:'Gulu Main Market', location:'Gulu', focus:['Grains','Livestock'], farmers:1820, traders:98, connected:['AFEX Smart Warehouse, Kigumba'], desc:'Primary market for northern region. Farmgain Africa tracked.' },
+      { lat: 1.07, lng: 34.18, name:'Mbale Central Market', location:'Mbale', focus:['Coffee','Grains'], farmers:1560, traders:87, connected:['Bugisu CU Grading Centre, Mbale'], desc:'Eastern highlands commercial hub. Farmgain Africa tracked.' },
+      { lat: 0.42, lng: 33.20, name:'Jinja Market', location:'Jinja', focus:['Maize','Beans'], farmers:1240, traders:72, connected:['Watujo Agro Produce Warehouse, Jinja'], desc:'Busia border corridor market. Farmgain Africa tracked.' },
+      { lat: 1.69, lng: 31.96, name:'Masindi Market', location:'Masindi', focus:['Grains','Cotton'], farmers:980, traders:54, connected:['AFEX Smart Warehouse, Masindi'], desc:'Mid-western grain market. Farmgain Africa tracked.' },
+      { lat: 1.72, lng: 33.61, name:'Soroti Market', location:'Soroti', focus:['Sesame','Groundnuts'], farmers:1100, traders:65, connected:['Farmgain Bulking Centre, Soroti'], desc:'Eastern region market. Farmgain Africa tracked.' },
+      { lat: 2.24, lng: 32.90, name:'Lira Market', location:'Lira', focus:['Maize','Sesame'], farmers:1300, traders:78, connected:['AFEX Smart Warehouse, Lira'], desc:'Lango sub-region hub. Farmgain Africa tracked.' },
+      { lat: -0.3386, lng: 29.9344, name:'Masaka Market', location:'Masaka', focus:['Coffee','Bananas'], farmers:950, traders:52, connected:['Kampala National Distribution Hub'], desc:'South-western market. Farmgain Africa tracked. Links to Kampala distribution.' },
+      { lat: -0.62, lng: 30.65, name:'Mbarara Market', location:'Mbarara', focus:['Coffee','Livestock'], farmers:1100, traders:68, connected:['Banyankole Kweterana Cooperative Union'], desc:'South-western hub. Farmgain Africa tracked.' },
+      { lat: 3.02, lng: 30.91, name:'Arua Market', location:'Arua', focus:['Cassava','Beans'], farmers:1400, traders:82, connected:['Arua Cassava & Bean Producers'], desc:'West Nile region market. Farmgain Africa tracked.' },
+      { lat: 2.53, lng: 34.63, name:'Moroto Market', location:'Moroto', focus:['Sorghum','Livestock'], farmers:600, traders:35, connected:['Gulu Main Market'], desc:'Karamoja region market. Farmgain Africa tracked.' },
+      { lat: 0.61, lng: 33.47, name:'Iganga Market', location:'Iganga', focus:['Maize','Beans'], farmers:1050, traders:58, connected:['Jinja Market'], desc:'Busoga sub-region market. Farmgain Africa tracked.' }
+    ]
+  },
+  { id: 'traders', label: 'Traders / Off-takers', color: '#f97316', count: 10, defaultOn: true,
+    markers: [
+      { lat: 0.328, lng: 32.590, name:'UGACOF (Uganda Coffee Company)', residence:'Kampala', tradesAt:'Nakawa Market', commodities:['Coffee'], desc:'Major Robusta coffee exporter. UCDA-registered. Top 10 exporter (74% of volume from 10 companies).' },
+      { lat: 0.318, lng: 32.572, name:'Olam Uganda', residence:'Kampala', tradesAt:'Nakawa Market', commodities:['Coffee','Grains'], desc:'International agribusiness. Coffee & grains exporter. UCDA-registered.' },
+      { lat: 0.340, lng: 32.598, name:'Mwanyi Uganda Coffee Exporters', residence:'Kampala', tradesAt:'Owino Market', commodities:['Coffee'], desc:'UCDA-registered exporter. Arabica & Robusta. 8.7M bags exported in 2025 ($2.5B).' },
+      { lat: 0.305, lng: 32.608, name:'Imbari Coffee Inc.', residence:'Kampala', tradesAt:'Owino Market', commodities:['Coffee'], desc:'Specialty Arabica & Robusta exporter. UCDA-registered. Instant coffee manufacturing.' },
+      { lat: 0.312, lng: 32.578, name:'Mukwano Industries', residence:'Kampala', tradesAt:'Nakawa Market', commodities:['Sunflower','Grains'], desc:'Major agro-processor. Sunflower oil extraction. Site coordinator procurement model.' },
+      { lat: 2.24, lng: 32.90, name:'Nile Agro Industries', residence:'Lira', tradesAt:'Lira Market', commodities:['Sunflower','Grains'], desc:'Sunflower oil & grain processing. 50+ oil milling facilities in Lira district.' },
+      { lat: 0.345, lng: 32.610, name:'Mount Meru Millers', residence:'Kampala', tradesAt:'Nakawa Market', commodities:['Sunflower','Grains'], desc:'Edible oils & grain processing. Major processor in Lango and Busoga.' },
+      { lat: 0.302, lng: 32.620, name:'Afrokai Limited', residence:'Kampala', tradesAt:'Owino Market', commodities:['Grains'], desc:'Grain importer/exporter. 43,000+ MT capacity. Modern silos and ventilation.' },
+      { lat: 0.338, lng: 32.560, name:'Bettagrains Limited', residence:'Kampala', tradesAt:'Kalerwe Market', commodities:['Grains'], desc:'Grain trading company. Farmgain Africa partnership.' },
+      { lat: 0.42, lng: 33.19, name:'Watujo Agro Produce Ltd', residence:'Jinja', tradesAt:'Jinja Market', commodities:['Maize','Beans','Rice'], desc:'Grain milling (maize, beans, rice) for Uganda and regional markets.' }
+    ]
+  },
+  { id: 'roads', label: 'Roads / Transport', color: '#6b7280', count: 4, defaultOn: false,
+    polyline: true,
+    routes: [
+      { label:'Northern Corridor (Kampala-Gulu)', coords:[[0.34,32.58],[0.55,32.55],[0.90,32.50],[1.20,32.45],[1.60,32.38],[2.00,32.40],[2.40,32.35],[2.77,32.30]], desc:'Main highway to Gulu and South Sudan border. 95% of food transported by road.' },
+      { label:'Eastern Corridor (Kampala-Jinja-Mbale)', coords:[[0.34,32.58],[0.38,32.70],[0.40,32.85],[0.42,33.00],[0.43,33.15],[0.42,33.20],[0.50,33.50],[0.70,33.80],[1.07,34.18]], desc:'To Kenya border via Busia. Coffee export route to Mombasa port.' },
+      { label:'Western Corridor (Kampala-Masaka-Mbarara)', coords:[[0.34,32.58],[0.32,32.50],[0.28,32.30],[0.15,32.00],[-0.10,31.70],[-0.34,29.93],[-0.62,30.65]], desc:'To Rwanda border. Coffee and livestock transport corridor.' },
+      { label:'North-Western Corridor (Kampala-Mubende-Fort Portal)', coords:[[0.34,32.58],[0.38,32.30],[0.50,32.00],[0.60,31.70],[0.70,31.30],[0.35,30.27]], desc:'To DRC border. Coffee and tea transport corridor.' }
+    ]
+  },
+  { id: 'logistics', label: 'Logistics Hubs', color: '#8b5cf6', count: 5, defaultOn: true,
+    markers: [
+      { lat: 0.325, lng: 32.570, name:'Kampala National Distribution Hub', location:'Kampala', services:['Central distribution','Cold chain','Customs clearing','Warehouse receipt'], connected:['Owino Market (St. Balikuddembe)','Nakawa Market, Kampala'], desc:'National logistics and distribution centre. UWRSA certified. EzyAgric 300K+ farmers.' },
+      { lat: 0.40, lng: 33.18, name:'Jinja Transport Hub', location:'Jinja', services:['Eastern corridor','Lake transport','Warehousing'], connected:['Jinja Market','Watujo Agro Produce Warehouse, Jinja'], desc:'Lake Victoria transport and logistics hub. Busia/Malaba border access.' },
+      { lat: 2.75, lng: 32.35, name:'Gulu Transit Centre', location:'Gulu', services:['Northern corridor','Cross-border','Storage'], connected:['Gulu Main Market','AFEX Smart Warehouse, Kigumba'], desc:'Northern transit hub for South Sudan corridor.' },
+      { lat: 0.47, lng: 34.08, name:'Busia Border Post', location:'Busia', services:['Kenya-Uganda trade','Customs','Inspection'], connected:['Jinja Market'], desc:'Major Kenya-Uganda border trade point. Grain and coffee exports.' },
+      { lat: 1.05, lng: 34.27, name:'Malaba Border Post', location:'Tororo', services:['Kenya-Uganda trade','Customs','Inspection'], connected:['Mbale Central Market'], desc:'Kenya-Uganda border trade point. Coffee export route.' }
+    ]
+  },
+  { id: 'processing', label: 'Processing Facilities', color: '#ef4444', count: 5, defaultOn: false,
+    markers: [
+      { lat: 0.330, lng: 32.588, name:'Kampala Coffee Dry Mills', location:'Kampala', type:'Coffee hulling, Packaging (>850 dry mills nationwide)', supply:['Bugisu Cooperative Union','NUCAFE Farmer Groups'], desc:'850+ coffee dry mills in Uganda (UCDA). Processing for export to 40+ countries.' },
+      { lat: 0.43, lng: 33.19, name:'Jinja Maize Millers', location:'Jinja', type:'Maize milling, Flour production', supply:['Jinja Aggregation Point','Watujo Agro Produce Ltd'], desc:'Busoga region milling hub. Maize flour for domestic and regional markets.' },
+      { lat: -0.61, lng: 30.64, name:'Mbarara Coffee Wet Mill', location:'Mbarara', type:'Coffee wet processing (WRS-certified)', supply:['Banyankole Kweterana Cooperative Union','Muhame Cooperative Society'], desc:'UCDA-distributed wet processing equipment. 35 wet mills deployed to cooperatives.' },
+      { lat: 1.08, lng: 34.17, name:'Mbale Arabica Wet Mill', location:'Mbale', type:'Arabica washed coffee processing', supply:['Bugisu Cooperative Union'], desc:'Mt. Elgon washed Arabica processing. UCDA wet mill distribution programme.' },
+      { lat: 2.25, lng: 32.90, name:'Lira Sunflower Oil Mills', location:'Lira', type:'Sunflower oil extraction, 50+ facilities', supply:['Lira Maize & Sesame Farmers Group','Soroti Soybean & Groundnut Farmers'], desc:'50+ oil milling facilities in Lira district (GOAL Uganda report). Mukwano, Nile Agro, Mount Meru.' }
+    ]
+  },
+  { id: 'secondary-markets', label: 'Secondary / Retail Markets', color: '#a855f7', count: 8, defaultOn: true,
+    markers: [
+      { lat: 0.310, lng: 32.582, name:'Kampala Central Retail Hub', location:'Kampala', type:'Retail distribution', products:['Coffee flour','Maize flour','Sunflower oil'], connected:['Kampala Coffee Dry Mills','Mount Meru Millers','Afrokai Limited'], desc:'Central Kampala retail distribution. Supermarkets (Nakumatt, Game), local dukas, institutional buyers.' },
+      { lat: 0.335, lng: 32.615, name:'Kampala Export Processing Zone', location:'Kampala', type:'Export aggregation', products:['Coffee','Sesame','Fish'], connected:['Mwanyi Uganda Coffee Exporters','Imbari Coffee Inc.','UGACOF (Uganda Coffee Company)'], desc:'Export aggregation zone. Containers to Mombasa port (coffee), Dubai (sesame), EU (fish).' },
+      { lat: 0.05, lng: 32.46, name:'Entebbe Lake Transport Hub', location:'Entebbe', type:'Lake transport / Export', products:['Coffee','Fish','Tea'], connected:['Kampala Export Processing Zone'], desc:'Lake Victoria ferry to Tanzania (Mwanza). Fish processing and export. Tea shipments.' },
+      { lat: 0.47, lng: 34.08, name:'Busia Cross-Border Market', location:'Busia', type:'Regional trade hub', products:['Maize','Beans','Rice'], connected:['Watujo Agro Produce Ltd','Jinja Maize Millers'], desc:'Kenya-Uganda cross-border trade. 200+ traders. Regional grain and produce exchange.' },
+      { lat: 1.05, lng: 34.27, name:'Mbale Cross-Border Market', location:'Tororo', type:'Regional trade hub', products:['Coffee','Maize'], connected:['Mbale Arabica Wet Mill','Bettagrains Limited'], desc:'Eastern Uganda cross-border trade to Kenya. Coffee and grain transit to Mombasa.' },
+      { lat: 2.77, lng: 32.32, name:'Gulu Northern Distribution', location:'Gulu', type:'Regional distribution', products:['Maize','Sorghum','Beans'], connected:['Lira Sunflower Oil Mills','AFEX Smart Warehouse, Kigumba'], desc:'Northern Uganda distribution centre. South Sudan corridor. Institutional buyers (WFP, NGOs).' },
+      { lat: -0.60, lng: 30.66, name:'Mbarara Regional Distribution', location:'Mbarara', type:'Regional distribution', products:['Coffee','Tea','Milk'], connected:['Mbarara Coffee Wet Mill','Banyankole Kweterana Cooperative Union'], desc:'South-western Uganda distribution. Rwanda/Burundi border trade. Dairy and coffee retail.' },
+      { lat: 1.75, lng: 33.60, name:'Soroti Regional Distribution', location:'Soroti', type:'Regional distribution', products:['Sesame','Groundnuts','Sorghum'], connected:['Soroti Soybean & Groundnut Farmers','Lira Sunflower Oil Mills'], desc:'Teso sub-region distribution. Karamoja corridor. Institutional and retail buyers.' }
+    ]
+  },
+  { id: 'lakes', label: 'Lakes & Water', color: '#60a5fa', count: 5, defaultOn: true,
+    lakes: true,
+    features: [
+      { name:'Lake Victoria', coords:[[−0.05,32.50],[−0.10,32.60],[−0.25,32.75],[−0.40,32.85],[−0.50,33.00],[−0.55,33.10],[−0.55,33.20],[−0.50,33.25],[−0.40,33.25],[−0.30,33.15],[−0.20,33.05],[−0.10,32.95],[0.00,32.90],[0.05,32.80],[0.10,32.70],[0.05,32.55],[−0.05,32.50]], desc:'Africa largest lake. Major fisheries and transport route. Shared with Kenya/Tanzania.' },
+      { name:'Lake Albert', coords:[[2.20,30.85],[2.10,30.95],[1.95,31.05],[1.80,31.15],[1.65,31.25],[1.50,31.30],[1.40,31.25],[1.35,31.15],[1.40,31.00],[1.55,30.90],[1.70,30.85],[1.90,30.82],[2.10,30.82],[2.20,30.85]], desc:'Western Uganda border lake. Albertine Rift fisheries. Oil exploration area.' },
+      { name:'Lake Kyoga', coords:[[1.50,32.80],[1.60,32.90],[1.70,33.00],[1.65,33.10],[1.55,33.15],[1.40,33.10],[1.30,33.00],[1.25,32.90],[1.30,32.82],[1.40,32.78],[1.50,32.80]], desc:'Central Uganda lake. Nile perch fisheries. Irrigation source for Lango Teso.' },
+      { name:'Lake Edward', coords:[[-0.05,29.55],[−0.10,29.65],[−0.15,29.75],[−0.18,29.85],[−0.15,29.95],[−0.10,30.00],[−0.02,30.00],[0.05,29.95],[0.08,29.85],[0.05,29.70],[0.00,29.60],[−0.05,29.55]], desc:'Queen Elizabeth National Park lake. Fisheries and tourism.' },
+      { name:'Lake George', coords:[[−0.25,30.05],[−0.30,30.10],[−0.35,30.15],[−0.38,30.20],[−0.35,30.28],[−0.30,30.30],[−0.22,30.28],[−0.18,30.22],[−0.18,30.15],[−0.20,30.10],[−0.25,30.05]], desc:'Queen Elizabeth National Park. Connected to Lake Edward via Kazinga Channel.' }
+    ]
+  },
+  { id: 'towns', label: 'Towns & Cities', color: '#78716c', count: 18, defaultOn: true,
+    towns: true,
+    markers: [
+      { name:'Kampala',       lat:0.3476, lng:32.5825, pop:'1.65M', note:'Capital city. Main commercial hub.' },
+      { name:'Entebbe',       lat:0.0512, lng:32.4637, pop:'70,000', note:'Lake shore town. International airport.' },
+      { name:'Jinja',         lat:0.4244, lng:33.1935, pop:'300,000', note:'Source of the Nile. Industrial town.' },
+      { name:'Mbale',         lat:1.0717, lng:34.1835, pop:'120,000', note:'Eastern regional capital. Coffee hub.' },
+      { name:'Gulu',          lat:2.7747, lng:32.2990, pop:'150,000', note:'Northern regional capital.' },
+      { name:'Lira',          lat:2.2496, lng:32.8998, pop:'130,000', note:'Lango sub-region centre.' },
+      { name:'Mbarara',       lat:-0.6072, lng:30.6544, pop:'100,000', note:'Western regional capital. Ankole hub.' },
+      { name:'Masaka',        lat:-0.3386, lng:29.9344, pop:'110,000', note:'Central-south regional centre.' },
+      { name:'Fort Portal',   lat:0.6710, lng:30.2754, pop:'60,000', note:'Rwenzori gateway. Tourism hub.' },
+      { name:'Soroti',        lat:1.7146, lng:33.6114, pop:'80,000', note:'Teso sub-region capital.' },
+      { name:'Arua',          lat:3.0261, lng:30.9331, pop:'60,000', note:'West Nile regional centre.' },
+      { name:'Moroto',        lat:1.6500, lng:34.5300, pop:'20,000', note:'Karamoja sub-region capital.' },
+      { name:'Kabale',        lat:-1.2481, lng:29.9899, pop:'50,000', note:'Kigezi sub-region capital.' },
+      { name:'Hoima',         lat:1.4332, lng:30.5167, pop:'60,000', note:'Bunyoro sub-region capital. Oil region.' },
+      { name:'Masindi',       lat:1.6822, lng:31.7428, pop:'50,000', note:'Bunyoro sub-region. Agricultural town.' },
+      { name:'Busia',         lat:0.4692, lng:34.0681, pop:'40,000', note:'Kenya-Uganda border crossing.' },
+      { name:'Mukono',        lat:0.3531, lng:32.7558, pop:'100,000', note:'Central Uganda. University town.' },
+      { name:'Tororo',        lat:0.7555, lng:34.1835, pop:'60,000', note:'Eastern border town. Cement industry.' }
+    ]
+  }
+];
+
+const COMMODITY_NODES = {
+  'Coffee': ['Bugisu Cooperative Union','Banyankole Kweterana Cooperative Union','Muhame Cooperative Society','Gulu Coffee Farmers Cooperative','NUCAFE Farmer Groups','Hoima Coffee Growers Cooperative','UGACOF (Uganda Coffee Company)','Olam Uganda','Mwanyi Uganda Coffee Exporters','Imbari Coffee Inc.','Kampala Coffee Dry Mills','Mbarara Coffee Wet Mill','Mbale Arabica Wet Mill'],
+  'Maize': ['Gulu Coffee Farmers Cooperative','Lira Maize & Sesame Farmers Group','Masindi Bulking Shed','Jinja Aggregation Point','AFEX Smart Warehouse, Kigumba','AFEX Smart Warehouse, Masindi','Jinja Maize Millers','Watujo Agro Produce Ltd','Bettagrains Limited'],
+  'Beans': ['Arua Cassava & Bean Producers','Hoima Coffee Growers Cooperative','Jinja Aggregation Point','Watujo Agro Produce Ltd'],
+  'Sesame': ['Soroti Soybean & Groundnut Farmers','Lira Maize & Sesame Farmers Group','Nile Agro Industries'],
+  'Cassava': ['Arua Cassava & Bean Producers'],
+  'Groundnuts': ['Soroti Soybean & Groundnut Farmers'],
+  'Sunflower': ['Lira Maize & Sesame Farmers Group','Mukwano Industries','Nile Agro Industries','Mount Meru Millers','Lira Sunflower Oil Mills'],
+  'Cotton': ['Nyakatonzi Co-operative Union','Gulu Coffee Farmers Cooperative'],
+  'Sorghum': ['Gulu Coffee Farmers Cooperative','AFEX Smart Warehouse, Lira','AFEX Smart Warehouse, Kigumba'],
+  'Livestock': ['Mbarara Market','Gulu Main Market','Moroto Market'],
+  'Vegetables': ['Nakawa Market, Kampala','Kalerwe Market, Kampala'],
+  'Grains': ['Afrokai Limited','Bettagrains Limited','Owino Market (St. Balikuddembe)','Kampala Central Retail Hub'],
+  'Tea': ['Nyakatonzi Co-operative Union','Mbarara Coffee Wet Mill','Mbarara Regional Distribution'],
+  'Bananas': ['Masaka Market','Banyankole Kweterana Cooperative Union','Mbarara Coffee Wet Mill','Mbarara Regional Distribution'],
+  'Mixed': ['NAAC','ESAFF Uganda'],
+  'Secondary Markets': ['Kampala Central Retail Hub','Kampala Export Processing Zone','Entebbe Lake Transport Hub','Busia Cross-Border Market','Mbale Cross-Border Market','Gulu Northern Distribution','Mbarara Regional Distribution','Soroti Regional Distribution']
+};
+
+const VALUE_CHAINS = [
+  // Coffee chain: Bugisu CU
+  { from: 'Bugisu Cooperative Union', to: 'Bugisu CU Grading Centre, Mbale', color: '#22c55e' },
+  { from: 'Bugisu CU Grading Centre, Mbale', to: 'AFEX Smart Warehouse, Bulambuli', color: '#f59e0b' },
+  { from: 'AFEX Smart Warehouse, Bulambuli', to: 'Mbale Central Market', color: '#3b82f6' },
+  { from: 'Mbale Central Market', to: 'UGACOF (Uganda Coffee Company)', color: '#f97316' },
+  // Coffee chain: Banyankole KW
+  { from: 'Banyankole Kweterana Cooperative Union', to: 'Mbarara Coffee Wet Mill', color: '#22c55e' },
+  { from: 'Mbarara Coffee Wet Mill', to: 'AFEX Smart Warehouse, Kampala', color: '#f59e0b' },
+  { from: 'AFEX Smart Warehouse, Kampala', to: 'Owino Market (St. Balikuddembe)', color: '#3b82f6' },
+  { from: 'Owino Market (St. Balikuddembe)', to: 'Mwanyi Uganda Coffee Exporters', color: '#f97316' },
+  // Coffee chain: Hoima
+  { from: 'Hoima Coffee Growers Cooperative', to: 'Hoima Aggregation Hub', color: '#22c55e' },
+  { from: 'Hoima Aggregation Hub', to: 'AFEX Smart Warehouse, Hoima', color: '#f59e0b' },
+  { from: 'AFEX Smart Warehouse, Hoima', to: 'Kampala National Distribution Hub', color: '#3b82f6' },
+  { from: 'Kampala National Distribution Hub', to: 'Olam Uganda', color: '#f97316' },
+  // Maize chain: Masindi
+  { from: 'Gulu Coffee Farmers Cooperative', to: 'Masindi Bulking Shed', color: '#22c55e' },
+  { from: 'Masindi Bulking Shed', to: 'AFEX Smart Warehouse, Masindi', color: '#f59e0b' },
+  { from: 'AFEX Smart Warehouse, Masindi', to: 'Masindi Market', color: '#3b82f6' },
+  { from: 'Masindi Market', to: 'Bettagrains Limited', color: '#f97316' },
+  // Maize chain: Kigumba
+  { from: 'Gulu Coffee Farmers Cooperative', to: 'AFEX Smart Warehouse, Kigumba', color: '#f59e0b' },
+  { from: 'AFEX Smart Warehouse, Kigumba', to: 'Gulu Main Market', color: '#3b82f6' },
+  { from: 'Gulu Main Market', to: 'Afrokai Limited', color: '#f97316' },
+  // Maize chain: Jinja
+  { from: 'Jinja Aggregation Point', to: 'Watujo Agro Produce Warehouse, Jinja', color: '#f59e0b' },
+  { from: 'Watujo Agro Produce Warehouse, Jinja', to: 'Jinja Market', color: '#3b82f6' },
+  { from: 'Jinja Market', to: 'Watujo Agro Produce Ltd', color: '#f97316' },
+  // Coffee chain: Mbale AFEX
+  { from: 'Bugisu CU Grading Centre, Mbale', to: 'AFEX Smart Warehouse, Mbale', color: '#f59e0b' },
+  { from: 'AFEX Smart Warehouse, Mbale', to: 'Mbale Central Market', color: '#3b82f6' },
+  // Sesame chain: Soroti AFEX
+  { from: 'Farmgain Bulking Centre, Soroti', to: 'AFEX Smart Warehouse, Soroti', color: '#f59e0b' },
+  { from: 'AFEX Smart Warehouse, Soroti', to: 'Soroti Market', color: '#3b82f6' },
+  // Coffee chain: Mbarara AFEX
+  { from: 'Banyankole Kweterana Cooperative Union', to: 'AFEX Smart Warehouse, Mbarara', color: '#f59e0b' },
+  { from: 'AFEX Smart Warehouse, Mbarara', to: 'Mbarara Market', color: '#3b82f6' },
+  // Sunflower chain: Lira
+  { from: 'Lira Maize & Sesame Farmers Group', to: 'NAAC Aggregation Hub, Lira', color: '#22c55e' },
+  { from: 'NAAC Aggregation Hub, Lira', to: 'AFEX Smart Warehouse, Lira', color: '#f59e0b' },
+  { from: 'AFEX Smart Warehouse, Lira', to: 'Lira Market', color: '#3b82f6' },
+  { from: 'Lira Market', to: 'Nile Agro Industries', color: '#f97316' },
+  // Bean chain: Arua
+  { from: 'Arua Cassava & Bean Producers', to: 'Arua Market', color: '#22c55e' },
+  { from: 'Arua Market', to: 'Gulu Main Market', color: '#3b82f6' },
+  // Logistics connections
+  { from: 'Jinja Market', to: 'Jinja Transport Hub', color: '#8b5cf6' },
+  { from: 'Mbale Central Market', to: 'Malaba Border Post', color: '#8b5cf6' },
+  // Processing → Secondary Market connections
+  { from: 'Kampala Coffee Dry Mills', to: 'Kampala Export Processing Zone', color: '#ef4444' },
+  { from: 'Kampala Export Processing Zone', to: 'Busia Cross-Border Market', color: '#a855f7' },
+  { from: 'Kampala Export Processing Zone', to: 'Mbale Cross-Border Market', color: '#a855f7' },
+  { from: 'Kampala Export Processing Zone', to: 'Entebbe Lake Transport Hub', color: '#a855f7' },
+  { from: 'Kampala Coffee Dry Mills', to: 'Kampala Central Retail Hub', color: '#ef4444' },
+  { from: 'Jinja Maize Millers', to: 'Busia Cross-Border Market', color: '#ef4444' },
+  { from: 'Jinja Maize Millers', to: 'Kampala Central Retail Hub', color: '#ef4444' },
+  { from: 'Mbarara Coffee Wet Mill', to: 'Mbarara Regional Distribution', color: '#ef4444' },
+  { from: 'Mbale Arabica Wet Mill', to: 'Mbale Cross-Border Market', color: '#ef4444' },
+  { from: 'Lira Sunflower Oil Mills', to: 'Gulu Northern Distribution', color: '#ef4444' },
+  { from: 'Lira Sunflower Oil Mills', to: 'Soroti Regional Distribution', color: '#ef4444' },
+  { from: 'Lira Sunflower Oil Mills', to: 'Kampala Central Retail Hub', color: '#ef4444' }
+];
+
+const MARKET_TRADER_CONNECTIONS = [
+  { from: 'Nakawa Market, Kampala', to: 'Mukwano Industries', color: '#f97316' },
+  { from: 'Nakawa Market, Kampala', to: 'Mount Meru Millers', color: '#f97316' },
+  { from: 'Mbale Central Market', to: 'Imbari Coffee Inc.', color: '#f97316' },
+  { from: 'Jinja Market', to: 'Watujo Agro Produce Ltd', color: '#f97316' },
+  { from: 'Lira Market', to: 'Nile Agro Industries', color: '#f97316' },
+  { from: 'Owino Market (St. Balikuddembe)', to: 'Afrokai Limited', color: '#f97316' },
+  { from: 'Kalerwe Market, Kampala', to: 'Bettagrains Limited', color: '#f97316' },
+  { from: 'Mbarara Market', to: 'Banyankole Kweterana Cooperative Union', color: '#f97316' }
+];
+
+// ─── REGION COLOR MAP ──────────────────────────────────────────────────
+
+const REGION_COLORS = {
+  Northern: '#d4e8d0',
+  Eastern: '#c8dde8',
+  Central: '#f0e4c8',
+  Western: '#ddd0e8'
+};
+const REGION_COLORS_DARK = {
+  Northern: '#228B22',
+  Eastern: '#1B4332',
+  Central: '#40916C',
+  Western: '#52796F'
+};
+
+// ─── GLOBALS ───────────────────────────────────────────────────────────
+
+let projection, geoGenerator, svg, gMain, gDistricts, gConnections, gNodes, gHighlights, gCountryOutline;
+let zoom;
+let allNodes = {};
+let selectedNodeName = null;
+let currentTransform = d3.zoomIdentity;
+let currentBasemap = 'white';
+let geojson = null;
+
+// ─── SVG SETUP ─────────────────────────────────────────────────────────
+
+const container = document.getElementById('map-container');
+const svgEl = d3.select('#map-svg');
+
+const tooltip = document.getElementById('map-tooltip');
+
+function setupSVG() {
+  svgEl.selectAll('*').remove();
+
+  // Background rect
+  svgEl.append('rect')
+    .attr('class', 'map-bg')
+    .attr('width', '100%')
+    .attr('height', '100%')
+    .attr('fill', '#ffffff');
+
+  gMain = svgEl.append('g').attr('id', 'g-main');
+  gHighlights = gMain.append('g').attr('id', 'g-highlights');
+  gCountryOutline = gMain.append('g').attr('id', 'g-outline');
+  gDistricts = gMain.append('g').attr('id', 'g-districts');
+  gConnections = gMain.append('g').attr('id', 'g-connections');
+  gNodes = gMain.append('g').attr('id', 'g-nodes');
+
+  zoom = d3.zoom()
+    .scaleExtent([0.5, 12])
+    .on('zoom', (event) => {
+      currentTransform = event.transform;
+      gMain.attr('transform', event.transform);
+    });
+
+  svgEl.call(zoom);
+}
+
+// ─── REGION DETECTION ──────────────────────────────────────────────────
+
+function getRegion(feature) {
+  const p = feature.properties;
+  if (p.region && REGION_COLORS[p.region]) return p.region;
+  if (p.REGION && REGION_COLORS[p.REGION]) return p.REGION;
+  // Try from name
+  const name = (p.district || p.DISTRICT || p.name || p.NAME || '').toLowerCase();
+  const sub = (p.subregion || p.SUBREGION || '').toLowerCase();
+
+  const northern = ['gulu','kitgum','lira','apac','kole','dokolo','amolatar','apac','olecko','nek','otuke','agago','kaberamaido','kotido','moroto','nabiratuk','napak','amudat','kapchorwa','kween','bulambuli','bufumbo','sironko','namisindwa','pallisa','kibuku','budaka','kamuli','iganga','bugiri','namayingo','soroti','katakwi','amuria','serere','kaberamaido','kalaki'];
+  const eastern = ['mbale','tororo','busia','samia','bukooli','butaleja','pallisa','kibuku','budaka','kamuli','iganga','bugiri','namayingo','mayuge'];
+  const western = ['hoima','masindi','kiryandongo','buliisa','kibaale','kabarole','kasese','bundibugyo','ntoroko','kyejojo','kamwenge','kakumiro','kyenjojo'];
+  const central = ['kampala','wakiso','mukono','luweero','nakaseke','nakasongola','masaka','mpigi','kyotera','kalangala','rakai','sembabule','mityana','mubende','kayunga'];
+
+  if (northern.some(d => name.includes(d) || sub.includes(d))) return 'Northern';
+  if (eastern.some(d => name.includes(d) || sub.includes(d))) return 'Eastern';
+  if (western.some(d => name.includes(d) || sub.includes(d))) return 'Western';
+  if (central.some(d => name.includes(d) || sub.includes(d))) return 'Central';
+  return 'Central';
+}
+
+function getDistrictName(feature) {
+  const p = feature.properties;
+  return p.district || p.DISTRICT || p.name || p.NAME || p.ADM2_NAME || 'Unknown';
+}
+
+function getSubregion(feature) {
+  const p = feature.properties;
+  return p.subregion || p.SUBREGION || p.ADM1_NAME || '';
+}
+
+// ─── RENDER DISTRICTS ──────────────────────────────────────────────────
+
+function renderDistricts(data) {
+  geojson = data;
+
+  projection = d3.geoMercator();
+  projection.fitExtent([[20, 20], [container.clientWidth - 20, container.clientHeight - 20]], data);
+
+  geoGenerator = d3.geoPath().projection(projection);
+
+  gDistricts.selectAll('.district-path')
+    .data(data.features)
+    .join('path')
+    .attr('class', 'district-path')
+    .attr('d', geoGenerator)
+    .attr('fill', d => REGION_COLORS[getRegion(d)])
+    .attr('data-district', d => getDistrictName(d))
+    .attr('data-region', d => getRegion(d))
+    .on('mouseenter', function(event, d) {
+      const name = getDistrictName(d);
+      const region = getRegion(d);
+      const sub = getSubregion(d);
+      tooltip.innerHTML = `<div class="tt-name">${name}</div><div class="tt-detail">${region} Region${sub ? ' &middot; ' + sub : ''}</div>`;
+      tooltip.style.display = 'block';
+      d3.select(this).raise();
+    })
+    .on('mousemove', function(event) {
+      const rect = container.getBoundingClientRect();
+      let x = event.clientX - rect.left + 12;
+      let y = event.clientY - rect.top - 10;
+      if (x + 220 > rect.width) x = event.clientX - rect.left - 230;
+      if (y + 60 > rect.height) y = event.clientY - rect.top - 60;
+      tooltip.style.left = x + 'px';
+      tooltip.style.top = y + 'px';
+    })
+    .on('mouseleave', function() {
+      tooltip.style.display = 'none';
+    })
+    .on('click', function(event, d) {
+      gDistricts.selectAll('.district-path').classed('selected', false);
+      d3.select(this).classed('selected', true);
+      const name = getDistrictName(d);
+      const region = getRegion(d);
+      const sub = getSubregion(d);
+      showDistrictInfo(name, region, sub);
+    });
+
+  // Uganda country outline (thick black border)
+  gCountryOutline.selectAll('*').remove();
+  gCountryOutline.append('path')
+    .datum({ type: 'FeatureCollection', features: data.features })
+    .attr('d', geoGenerator)
+    .attr('fill', 'none')
+    .attr('stroke', '#000')
+    .attr('stroke-width', 2.5)
+    .attr('stroke-linejoin', 'round');
+}
+
+function showDistrictInfo(name, region, sub) {
+  const panel = document.getElementById('info-panel');
+  const title = document.getElementById('info-title');
+  const body = document.getElementById('info-body');
+  title.textContent = name;
+  let html = `<div class="type-badge" style="background:${REGION_COLORS_DARK[region] ? REGION_COLORS_DARK[region] : '#64748b'}">${region} Region</div>`;
+  html += `<div class="detail-row"><strong>District:</strong> ${name}</div>`;
+  if (sub) html += `<div class="detail-row"><strong>Subregion:</strong> ${sub}</div>`;
+  // Find nodes in this district
+  const nodesHere = [];
+  LAYER_CONFIG.forEach(cfg => {
+    if (!cfg.markers) return;
+    cfg.markers.forEach(m => {
+      const pt = projection([m.lng, m.lat]);
+      if (pt) {
+        // Find which district contains this point
+        for (const f of geojson.features) {
+          if (d3.geoContains(f, [m.lng, m.lat])) {
+            if (getDistrictName(f) === name) {
+              nodesHere.push({ name: m.name, type: cfg.label, color: cfg.color });
+            }
+            break;
+          }
+        }
+      }
+    });
+  });
+  if (nodesHere.length > 0) {
+    html += `<div class="section-label">Value Chain Nodes (${nodesHere.length})</div>`;
+    nodesHere.forEach(n => {
+      html += `<div class="detail-row"><strong style="color:${n.color}">&#9679;</strong> ${n.name} <span style="color:#94a3b8;font-size:11px;">(${n.type})</span></div>`;
+    });
+  }
+  body.innerHTML = html;
+  panel.classList.add('visible');
+}
+
+// ─── RENDER CONNECTIONS ────────────────────────────────────────────────
+
+function renderConnections() {
+  gConnections.selectAll('*').remove();
+
+  const allConnections = [...VALUE_CHAINS, ...MARKET_TRADER_CONNECTIONS];
+  allConnections.forEach(conn => {
+    const fromNode = findNode(conn.from);
+    const toNode = findNode(conn.to);
+    if (!fromNode || !toNode) return;
+
+    const fromPos = projection([fromNode.lng, fromNode.lat]);
+    const toPos = projection([toNode.lng, toNode.lat]);
+    if (!fromPos || !toPos) return;
+
+    const line = gConnections.append('line')
+      .attr('class', 'connection-line')
+      .attr('x1', fromPos[0]).attr('y1', fromPos[1])
+      .attr('x2', toPos[0]).attr('y2', toPos[1])
+      .attr('stroke', conn.color)
+      .attr('stroke-width', 2.5)
+      .attr('stroke-dasharray', '6 4')
+      .attr('stroke-opacity', 0.75)
+      .attr('data-from', conn.from)
+      .attr('data-to', conn.to);
+  });
+}
+
+// ─── RENDER NODES ──────────────────────────────────────────────────────
+
+function getShape(id) {
+  const shapes = {
+    producers: 'circle',
+    aggregation: 'diamond',
+    warehouses: 'square',
+    markets: 'circle',
+    traders: 'triangle',
+    logistics: 'hexagon',
+    processing: 'star',
+    roads: ''
+  };
+  return shapes[id] || 'circle';
+}
+
+function drawShape(selection, shape, size, color) {
+  selection.selectAll('*').remove();
+
+  if (shape === 'circle') {
+    selection.append('circle')
+      .attr('class', 'node-shape')
+      .attr('r', size)
+      .attr('fill', color)
+      .attr('stroke', '#fff')
+      .attr('stroke-width', 2);
+  } else if (shape === 'diamond') {
+    const s = size * 0.85;
+    selection.append('rect')
+      .attr('class', 'node-shape')
+      .attr('x', -s / 2).attr('y', -s / 2)
+      .attr('width', s).attr('height', s)
+      .attr('fill', color)
+      .attr('stroke', '#fff')
+      .attr('stroke-width', 2)
+      .attr('rx', 1.5)
+      .attr('transform', 'rotate(45)');
+  } else if (shape === 'square') {
+    const s = size * 1.6;
+    selection.append('rect')
+      .attr('class', 'node-shape')
+      .attr('x', -s / 2).attr('y', -s / 2)
+      .attr('width', s).attr('height', s)
+      .attr('fill', color)
+      .attr('stroke', '#fff')
+      .attr('stroke-width', 2)
+      .attr('rx', 2);
+  } else if (shape === 'triangle') {
+    const h = size * 2;
+    const w = size * 1.7;
+    selection.append('polygon')
+      .attr('class', 'node-shape')
+      .attr('points', `0,${-h/2} ${w/2},${h/2} ${-w/2},${h/2}`)
+      .attr('fill', color)
+      .attr('stroke', '#fff')
+      .attr('stroke-width', 2);
+  } else if (shape === 'hexagon') {
+    const r = size * 1.05;
+    const pts = [];
+    for (let i = 0; i < 6; i++) {
+      const angle = (Math.PI / 3) * i - Math.PI / 6;
+      pts.push([r * Math.cos(angle), r * Math.sin(angle)]);
+    }
+    selection.append('polygon')
+      .attr('class', 'node-shape')
+      .attr('points', pts.map(p => p.join(',')).join(' '))
+      .attr('fill', color)
+      .attr('stroke', '#fff')
+      .attr('stroke-width', 2);
+  } else if (shape === 'star') {
+    const outerR = size * 1.1;
+    const innerR = size * 0.5;
+    const pts = [];
+    for (let i = 0; i < 10; i++) {
+      const r = i % 2 === 0 ? outerR : innerR;
+      const angle = (Math.PI / 5) * i - Math.PI / 2;
+      pts.push([r * Math.cos(angle), r * Math.sin(angle)]);
+    }
+    selection.append('polygon')
+      .attr('class', 'node-shape')
+      .attr('points', pts.map(p => p.join(',')).join(' '))
+      .attr('fill', color)
+      .attr('stroke', '#fff')
+      .attr('stroke-width', 2);
+  }
+}
+
+function renderNodes() {
+  gNodes.selectAll('.node-group').remove();
+  allNodes = {};
+
+  // Step 1: Project all nodes to screen coordinates
+  const projected = [];
+  LAYER_CONFIG.forEach(cfg => {
+    if (!cfg.markers || cfg.polyline) return;
+    const shape = getShape(cfg.id);
+    const size = cfg.id === 'markets' ? 9 : (cfg.id === 'producers' ? 7 : 8);
+    cfg.markers.forEach(data => {
+      const pos = projection([data.lng, data.lat]);
+      if (!pos) return;
+      projected.push({ data, cfg, shape, size, x: pos[0], y: pos[1] });
+    });
+  });
+
+  // Step 2: Collision detection — push overlapping nodes apart
+  const MIN_DIST = 22;
+  for (let iter = 0; iter < 80; iter++) {
+    let moved = false;
+    for (let i = 0; i < projected.length; i++) {
+      for (let j = i + 1; j < projected.length; j++) {
+        const a = projected[i], b = projected[j];
+        const dx = b.x - a.x, dy = b.y - a.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < MIN_DIST && dist > 0) {
+          const push = (MIN_DIST - dist) / 2;
+          const nx = dx / dist, ny = dy / dist;
+          a.x -= nx * push;
+          a.y -= ny * push;
+          b.x += nx * push;
+          b.y += ny * push;
+          moved = true;
+        }
+      }
+    }
+    if (!moved) break;
+  }
+
+  // Step 3: Render nodes at adjusted positions
+  projected.forEach(({ data, cfg, shape, size, x, y }) => {
+    const nodeData = { ...data, type: cfg.label, layerId: cfg.id, shape };
+    allNodes[data.name] = nodeData;
+
+    const group = gNodes.append('g')
+      .attr('class', 'node-group')
+      .attr('transform', `translate(${x},${y})`)
+      .attr('data-name', data.name)
+      .attr('data-layer', cfg.id)
+      .on('click', function(event) {
+        event.stopPropagation();
+        showNodeDetails(data, cfg, nodeData);
+        highlightPathway(data.name);
+      })
+      .on('mouseenter', function(event) {
+        tooltip.innerHTML = `<div class="tt-name">${data.name}</div><div class="tt-detail">${cfg.label}</div>`;
+        tooltip.style.display = 'block';
+      })
+      .on('mousemove', function(event) {
+        const rect = container.getBoundingClientRect();
+        let mx = event.clientX - rect.left + 12;
+        let my = event.clientY - rect.top - 10;
+        if (mx + 220 > rect.width) mx = event.clientX - rect.left - 230;
+        if (my + 60 > rect.height) my = event.clientY - rect.top - 60;
+        tooltip.style.left = mx + 'px';
+        tooltip.style.top = my + 'px';
+      })
+      .on('mouseleave', function() {
+        tooltip.style.display = 'none';
+      });
+
+    drawShape(group, shape, size, cfg.color);
+
+    if (cfg.id === 'markets' || cfg.id === 'logistics' || cfg.id === 'processing') {
+      group.append('text')
+        .attr('class', 'node-label')
+        .attr('y', size + 12)
+        .text(data.name.length > 20 ? data.name.substring(0, 18) + '...' : data.name);
+    }
+  });
+}
+
+// ─── RENDER ROADS ──────────────────────────────────────────────────────
+
+function renderRoads() {
+  const roadLayer = LAYER_CONFIG.find(l => l.id === 'roads');
+  if (!roadLayer || !roadLayer.routes) return;
+
+  roadLayer.routes.forEach(route => {
+    const lineGen = d3.line()
+      .x(d => projection([d[1], d[0]])[0])
+      .y(d => projection([d[1], d[0]])[1])
+      .curve(d3.curveCatmullRom.alpha(0.5));
+
+    gConnections.append('path')
+      .attr('class', 'connection-line road-line')
+      .attr('d', lineGen(route.coords))
+      .attr('stroke', roadLayer.color)
+      .attr('stroke-width', 3)
+      .attr('stroke-dasharray', '8 4')
+      .attr('stroke-opacity', 0.7)
+      .attr('data-layer', 'roads')
+      .style('display', roadLayer.defaultOn ? null : 'none');
+  });
+}
+
+// ─── RENDER LAKES ────────────────────────────────────────────────────
+
+function renderLakes() {
+  const lakeLayer = LAYER_CONFIG.find(l => l.id === 'lakes');
+  if (!lakeLayer || !lakeLayer.features) return;
+
+  const gLakes = gMain.append('g').attr('id', 'g-lakes');
+
+  lakeLayer.features.forEach(lake => {
+    const lineGen = d3.line()
+      .x(d => projection([d[1], d[0]])[0])
+      .y(d => projection([d[1], d[0]])[1])
+      .curve(d3.curveCardinalClosed.tension(0.5));
+
+    gLakes.append('path')
+      .attr('class', 'lake-path')
+      .attr('d', lineGen(lake.coords))
+      .attr('fill', '#b3d4f5')
+      .attr('fill-opacity', 0.5)
+      .attr('stroke', '#6ba3d6')
+      .attr('stroke-width', 1)
+      .attr('stroke-opacity', 0.7)
+      .attr('data-layer', 'lakes')
+      .style('cursor', 'pointer')
+      .on('mouseover', function() {
+        d3.select(this).attr('fill-opacity', 0.7);
+        showTooltip(lake.name + ': ' + lake.desc, d3.event || event);
+      })
+      .on('mouseout', function() {
+        d3.select(this).attr('fill-opacity', 0.5);
+        hideTooltip();
+      });
+  });
+}
+
+// ─── RENDER TOWNS ────────────────────────────────────────────────────
+
+function renderTowns() {
+  const townLayer = LAYER_CONFIG.find(l => l.id === 'towns');
+  if (!townLayer || !townLayer.markers) return;
+
+  const gTowns = gMain.append('g').attr('id', 'g-towns');
+
+  townLayer.markers.forEach(t => {
+    const [x, y] = projection([t.lng, t.lat]);
+
+    const grp = gTowns.append('g')
+      .attr('class', 'town-group')
+      .attr('data-layer', 'towns')
+      .attr('transform', `translate(${x},${y})`)
+      .style('cursor', 'default');
+
+    grp.append('circle')
+      .attr('r', 3)
+      .attr('fill', '#57534e')
+      .attr('fill-opacity', 0.7)
+      .attr('stroke', '#fff')
+      .attr('stroke-width', 1);
+
+    grp.append('text')
+      .attr('x', 6)
+      .attr('y', 1)
+      .attr('font-size', '9px')
+      .attr('font-family', "'Fraunces', serif")
+      .attr('fill', '#44403c')
+      .attr('fill-opacity', 0.85)
+      .text(t.name);
+
+    grp.on('mouseover', function() {
+      d3.select(this).select('circle').attr('r', 5).attr('fill-opacity', 1);
+      showTooltip(`${t.name} (pop. ${t.pop}) — ${t.note}`, d3.event || event);
+    })
+    .on('mouseout', function() {
+      d3.select(this).select('circle').attr('r', 3).attr('fill-opacity', 0.7);
+      hideTooltip();
+    });
+  });
+}
+
+// ─── FIND NODE ─────────────────────────────────────────────────────────
+
+function findNode(name) {
+  for (const cfg of LAYER_CONFIG) {
+    if (!cfg.markers) continue;
+    for (const m of cfg.markers) {
+      if (m.name === name) return m;
+    }
+  }
+  return null;
+}
+
+// ─── HIGHLIGHT PATHWAY ────────────────────────────────────────────────
+
+function clearHighlights() {
+  gHighlights.selectAll('*').remove();
+  selectedNodeName = null;
+}
+
+function highlightPathway(nodeName) {
+  clearHighlights();
+  selectedNodeName = nodeName;
+
+  const allConnections = [...VALUE_CHAINS, ...MARKET_TRADER_CONNECTIONS];
+  const visited = new Set();
+  const relatedConns = [];
+  const relatedNodes = new Set();
+
+  function traverseForward(name) {
+    allConnections.forEach(c => {
+      if (c.from === name && !visited.has(c.from + '->' + c.to)) {
+        visited.add(c.from + '->' + c.to);
+        relatedConns.push(c);
+        relatedNodes.add(c.from);
+        relatedNodes.add(c.to);
+        traverseForward(c.to);
+      }
+    });
+  }
+  function traverseBackward(name) {
+    allConnections.forEach(c => {
+      if (c.to === name && !visited.has(c.from + '->' + c.to)) {
+        visited.add(c.from + '->' + c.to);
+        relatedConns.push(c);
+        relatedNodes.add(c.from);
+        relatedNodes.add(c.to);
+        traverseBackward(c.from);
+      }
+    });
+  }
+
+  traverseForward(nodeName);
+  traverseBackward(nodeName);
+
+  // Draw highlight lines
+  relatedConns.forEach(conn => {
+    const fromNode = findNode(conn.from);
+    const toNode = findNode(conn.to);
+    if (!fromNode || !toNode) return;
+    const fromPos = projection([fromNode.lng, fromNode.lat]);
+    const toPos = projection([toNode.lng, toNode.lat]);
+    if (!fromPos || !toPos) return;
+
+    gHighlights.append('line')
+      .attr('class', 'highlight-line')
+      .attr('x1', fromPos[0]).attr('y1', fromPos[1])
+      .attr('x2', toPos[0]).attr('y2', toPos[1])
+      .attr('stroke', conn.color)
+      .attr('stroke-width', 4)
+      .attr('stroke-opacity', 0.85)
+      .attr('stroke-dasharray', '6 4');
+  });
+
+  // Draw highlight rings
+  relatedNodes.forEach(name => {
+    const node = findNode(name);
+    if (!node) return;
+    const pos = projection([node.lng, node.lat]);
+    if (!pos) return;
+
+    gHighlights.append('circle')
+      .attr('class', 'highlight-ring')
+      .attr('cx', pos[0]).attr('cy', pos[1])
+      .attr('r', 18)
+      .attr('fill', '#FFD700')
+      .attr('fill-opacity', 0.18)
+      .attr('stroke', '#FFD700')
+      .attr('stroke-width', 2.5)
+      .attr('stroke-opacity', 0.7);
+  });
+
+  // Update info panel if open
+  if (document.getElementById('info-panel').classList.contains('visible')) {
+    const node = allNodes[nodeName];
+    if (node) {
+      const layerCfg = LAYER_CONFIG.find(l => l.id === node.layerId);
+      showNodeDetails(findNode(nodeName), layerCfg || {}, node);
+    }
+  }
+}
+
+// ─── NODE DETAILS ──────────────────────────────────────────────────────
+
+function showNodeDetails(data, layerCfg, nodeData) {
+  const panel = document.getElementById('info-panel');
+  const title = document.getElementById('info-title');
+  const body = document.getElementById('info-body');
+
+  title.textContent = data.name;
+
+  const color = layerCfg.color || '#1a7f5a';
+  let html = `<div class="type-badge" style="background:${color}">${layerCfg.label || ''}</div>`;
+
+  if (data.village) html += `<div class="detail-row"><strong>Village:</strong> ${data.village}</div>`;
+  if (data.location) html += `<div class="detail-row"><strong>Location:</strong> ${data.location}</div>`;
+  if (data.crops) html += `<div class="detail-row"><strong>Crops:</strong> ${data.crops.join(', ')}</div>`;
+  if (data.farmers) html += `<div class="detail-row"><strong>Farmers:</strong> ${data.farmers.toLocaleString()}</div>`;
+  if (data.volume) html += `<div class="detail-row"><strong>Production:</strong> ${data.volume.toLocaleString()} MT/year</div>`;
+  if (data.capacity) html += `<div class="detail-row"><strong>Capacity:</strong> ${data.capacity}</div>`;
+  if (data.occupancy) html += `<div class="detail-row"><strong>Occupancy:</strong> ${data.occupancy}</div>`;
+  if (data.focus) html += `<div class="detail-row"><strong>Focus:</strong> ${data.focus.join(', ')}</div>`;
+  if (data.traders !== undefined) html += `<div class="detail-row"><strong>Traders:</strong> ${data.traders}</div>`;
+  if (data.residence) html += `<div class="detail-row"><strong>Residence:</strong> ${data.residence}</div>`;
+  if (data.tradesAt) html += `<div class="detail-row"><strong>Trades at:</strong> ${data.tradesAt}</div>`;
+  if (data.commodities) html += `<div class="detail-row"><strong>Commodities:</strong> ${data.commodities instanceof Array ? data.commodities.join(', ') : data.commodities}</div>`;
+  if (data.products) html += `<div class="detail-row"><strong>Products:</strong> ${data.products.join(', ')}</div>`;
+  if (data.services) html += `<div class="detail-row"><strong>Services:</strong> ${data.services.join(', ')}</div>`;
+  if (data.type) html += `<div class="detail-row"><strong>Type:</strong> ${data.type}</div>`;
+  if (data.supply) html += `<div class="detail-row"><strong>Supply Areas:</strong> ${data.supply.join(', ')}</div>`;
+  if (data.connected) html += `<div class="detail-row"><strong>Connected to:</strong> ${data.connected.join(', ')}</div>`;
+  if (data.desc) html += `<div class="detail-row"><strong>Description:</strong> ${data.desc}</div>`;
+  html += `<div class="detail-row"><strong>GPS:</strong> ${data.lat.toFixed(4)}&deg;N, ${data.lng.toFixed(4)}&deg;E</div>`;
+
+  // Pathway
+  const allConnections = [...VALUE_CHAINS, ...MARKET_TRADER_CONNECTIONS];
+  const pathwayNodes = [];
+  function buildPath(name, dir) {
+    const conns = allConnections.filter(c => dir === 'forward' ? c.from === name : c.to === name);
+    conns.forEach(c => {
+      const next = dir === 'forward' ? c.to : c.from;
+      if (!pathwayNodes.includes(next)) {
+        pathwayNodes.push(next);
+        buildPath(next, dir);
+      }
+    });
+  }
+  pathwayNodes.push(data.name);
+  buildPath(data.name, 'forward');
+  if (pathwayNodes.length > 1) {
+    html += `<div class="section-label">Value-Chain Pathway</div><div class="pathway-flow">`;
+    pathwayNodes.forEach((n, i) => {
+      const isActive = n === data.name;
+      html += `<span class="pathway-step ${isActive ? 'active' : ''}">${n}</span>`;
+      if (i < pathwayNodes.length - 1) html += `<span class="pathway-arrow">&rarr;</span>`;
+    });
+    html += `</div>`;
+  }
+
+  body.innerHTML = html;
+  panel.classList.add('visible');
+}
+
+function closeInfoPanel() {
+  document.getElementById('info-panel').classList.remove('visible');
+  clearHighlights();
+}
+
+// ─── SIDEBAR ───────────────────────────────────────────────────────────
+
+function buildSidebar() {
+  const container = document.getElementById('layer-toggles');
+  container.innerHTML = '';
+
+  // Connections toggle
+  const connItem = document.createElement('label');
+  connItem.className = 'layer-row';
+  connItem.innerHTML = `
+    <input type="checkbox" checked onchange="toggleConnections(this.checked)">
+    <div class="layer-icon" style="background:#f1f5f9;"><div style="width:14px;height:2px;background:#6b7280;border-radius:1px;"></div></div>
+    <div class="layer-info"><div class="layer-name">Value-Chain Connections</div><div class="layer-count">${VALUE_CHAINS.length + MARKET_TRADER_CONNECTIONS.length} links</div></div>
+  `;
+  container.appendChild(connItem);
+
+  LAYER_CONFIG.forEach(cfg => {
+    const item = document.createElement('label');
+    item.className = 'layer-row';
+
+    let shapeHtml = '';
+    if (cfg.polyline) {
+      shapeHtml = `<div style="width:14px;height:2px;background:${cfg.color};border-radius:1px;"></div>`;
+    } else if (cfg.id === 'producers' || cfg.id === 'markets') {
+      shapeHtml = `<div style="width:10px;height:10px;border-radius:50%;background:${cfg.color};"></div>`;
+    } else if (cfg.id === 'aggregation') {
+      shapeHtml = `<div style="width:9px;height:9px;clip-path:polygon(50% 0%,100% 50%,50% 100%,0% 50%);background:${cfg.color};"></div>`;
+    } else if (cfg.id === 'warehouses') {
+      shapeHtml = `<div style="width:9px;height:9px;background:${cfg.color};border-radius:2px;"></div>`;
+    } else if (cfg.id === 'traders') {
+      shapeHtml = `<div style="width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-bottom:9px solid ${cfg.color};"></div>`;
+    } else if (cfg.id === 'logistics') {
+      shapeHtml = `<div style="width:10px;height:9px;clip-path:polygon(25% 0%,75% 0%,100% 50%,75% 100%,25% 100%,0% 50%);background:${cfg.color};"></div>`;
+    } else if (cfg.id === 'processing') {
+      shapeHtml = `<div style="width:10px;height:10px;clip-path:polygon(50% 0%,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%);background:${cfg.color};"></div>`;
+    }
+
+    item.innerHTML = `
+      <input type="checkbox" ${cfg.defaultOn ? 'checked' : ''} onchange="toggleLayer('${cfg.id}', this.checked)">
+      <div class="layer-icon" style="background:${cfg.color}11;">${shapeHtml}</div>
+      <div class="layer-info"><div class="layer-name">${cfg.label}</div><div class="layer-count">${cfg.count || 0} nodes</div></div>
+    `;
+    container.appendChild(item);
+  });
+
+  buildLegend();
+}
+
+function buildLegend() {
+  const legend = document.getElementById('legend');
+  legend.innerHTML = '';
+  const items = [
+    { label: 'Coffee Cooperatives (Bugisu CU, Nyakatonzi, Banyankole KW)', color: '#22c55e', cls: 'circle' },
+    { label: 'Aggregation & Bulking Centres (NAAC, Farmgain, Bugisu CU)', color: '#f59e0b', cls: 'diamond' },
+    { label: 'AFEX & UWRSA Certified Warehouses', color: '#3b82f6', cls: 'square' },
+    { label: 'Owino, Nakawa, Kalerwe, Gulu, Mbale Markets', color: '#1a7f5a', cls: 'circle-lg' },
+    { label: 'UGACOF, Olam, Mwanyi, Mukwano Traders', color: '#f97316', cls: 'triangle' },
+    { label: 'Northern, Eastern, Western, North-Western Corridors', color: '#6b7280', cls: 'line' },
+    { label: 'Kampala, Jinja, Gulu, Busia, Malaba Hubs', color: '#8b5cf6', cls: 'hexagon' },
+    { label: 'Kampala Dry Mills, Jinja, Lira, Mbale Processors', color: '#ef4444', cls: 'star' },
+    { label: 'Cooperatives supply to Grading & Bulking', color: '#22c55e', cls: 'dash' },
+    { label: 'Bulking feeds into AFEX & UWRSA Storage', color: '#f59e0b', cls: 'dash' },
+    { label: 'Warehouses distribute to Primary Markets', color: '#3b82f6', cls: 'dash' },
+    { label: 'Markets supply to Export & Processing', color: '#f97316', cls: 'dash' }
+  ];
+
+  items.forEach(item => {
+    const div = document.createElement('div');
+    div.className = 'legend-item';
+    let symbolHtml = '';
+    if (item.cls === 'dash') {
+      symbolHtml = `<div style="width:16px;height:0;border-top:2px dashed ${item.color};"></div>`;
+    } else if (item.cls === 'line') {
+      symbolHtml = `<div style="width:16px;height:0;border-top:2px solid ${item.color};border-style:dashed;"></div>`;
+    } else if (item.cls === 'circle' || item.cls === 'circle-lg') {
+      const r = item.cls === 'circle-lg' ? 6 : 5;
+      symbolHtml = `<svg width="12" height="12"><circle cx="6" cy="6" r="${r}" fill="${item.color}"/></svg>`;
+    } else if (item.cls === 'diamond') {
+      symbolHtml = `<div style="width:9px;height:9px;clip-path:polygon(50% 0%,100% 50%,50% 100%,0% 50%);background:${item.color};"></div>`;
+    } else if (item.cls === 'square') {
+      symbolHtml = `<div style="width:9px;height:9px;background:${item.color};border-radius:2px;"></div>`;
+    } else if (item.cls === 'triangle') {
+      symbolHtml = `<div style="width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-bottom:9px solid ${item.color};"></div>`;
+    } else if (item.cls === 'hexagon') {
+      symbolHtml = `<div style="width:10px;height:9px;clip-path:polygon(25% 0%,75% 0%,100% 50%,75% 100%,25% 100%,0% 50%);background:${item.color};"></div>`;
+    } else if (item.cls === 'star') {
+      symbolHtml = `<div style="width:10px;height:10px;clip-path:polygon(50% 0%,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%);background:${item.color};"></div>`;
+    }
+    div.innerHTML = `<div class="legend-symbol">${symbolHtml}</div><span>${item.label}</span>`;
+    legend.appendChild(div);
+  });
+}
+
+// ─── INTERACTIONS ──────────────────────────────────────────────────────
+
+function toggleLayer(id, on) {
+  if (id === 'roads') {
+    gConnections.selectAll('.road-line').style('display', on ? null : 'none');
+    return;
+  }
+  if (id === 'lakes') {
+    d3.selectAll('.lake-path').style('display', on ? null : 'none');
+    return;
+  }
+  if (id === 'towns') {
+    d3.selectAll('.town-group').style('display', on ? null : 'none');
+    return;
+  }
+  gNodes.selectAll(`.node-group[data-layer="${id}"]`).style('display', on ? null : 'none');
+}
+
+function toggleConnections(on) {
+  gConnections.selectAll('.connection-line:not(.road-line)').style('display', on ? null : 'none');
+}
+
+function switchBasemap(type) {
+  currentBasemap = type;
+  document.querySelectorAll('.basemap-btn').forEach(b => b.classList.remove('active'));
+  document.querySelector(`[data-basemap="${type}"]`).classList.add('active');
+
+  svgEl.select('.map-bg').attr('fill', '#ffffff');
+  gDistricts.selectAll('.district-path').each(function(d) {
+    d3.select(this).attr('fill', REGION_COLORS[getRegion(d)]);
+  });
+}
+
+function searchNode() {
+  const query = document.getElementById('search-input').value.trim().toLowerCase();
+  if (!query) return;
+
+  for (const cfg of LAYER_CONFIG) {
+    if (!cfg.markers) continue;
+    for (const m of cfg.markers) {
+      if (m.name.toLowerCase().includes(query) || (m.village && m.village.toLowerCase().includes(query)) || (m.location && m.location.toLowerCase().includes(query))) {
+        const pos = projection([m.lng, m.lat]);
+        if (!pos) return;
+        const w = container.clientWidth;
+        const h = container.clientHeight;
+        const scale = 3;
+        const x = w / 2 - pos[0] * scale;
+        const y = h / 2 - pos[1] * scale;
+        svgEl.transition().duration(750).call(
+          zoom.transform,
+          d3.zoomIdentity.translate(x, y).scale(scale)
+        );
+        showNodeDetails(m, cfg, { ...m, type: cfg.label, layerId: cfg.id });
+        highlightPathway(m.name);
+        return;
+      }
+    }
+  }
+  alert('Node not found. Try a different search term.');
+}
+
+function filterByCommodity() {
+  const commodity = document.getElementById('commodity-filter').value;
+  const commodityEmoji = {
+    'Coffee': '☕', 'Maize': '🌽', 'Beans': '🫘',
+    'Sesame': '🪴', 'Cassava': '🥔', 'Groundnuts': '🥜',
+    'Sunflower': '🌻', 'Cotton': '🧵', 'Sorghum': '🌾',
+    'Tea': '🍵', 'Bananas': '🍌', 'Livestock': '🐄',
+    'Vegetables': '🥬', 'Grains': '🌾', 'Mixed': '🌿'
+  };
+  const commodityColor = {
+    'Coffee': '#22c55e', 'Maize': '#eab308', 'Beans': '#a3723a',
+    'Sesame': '#d4a574', 'Cassava': '#8B4513', 'Groundnuts': '#c9a96e',
+    'Sunflower': '#f59e0b', 'Cotton': '#e8e8e8', 'Sorghum': '#cd853f',
+    'Tea': '#2d6a4f', 'Bananas': '#facc15', 'Livestock': '#92400e',
+    'Vegetables': '#16a34a', 'Grains': '#ca8a04', 'Mixed': '#6b7280'
+  }[commodity] || '#22c55e';
+
+  if (!commodity) {
+    // Reset — restore original shapes
+    gNodes.selectAll('.node-group').style('opacity', 1);
+    gNodes.selectAll('.node-group').each(function() {
+      const g = d3.select(this);
+      const cfg = LAYER_CONFIG.find(c => c.id === g.attr('data-layer'));
+      if (!cfg) return;
+      const shape = getShape(cfg.id);
+      const size = cfg.id === 'markets' ? 9 : (cfg.id === 'producers' ? 7 : 8);
+      g.select('.commodity-emoji').remove();
+      g.select('.node-shape').style('display', null);
+      drawShape(g, shape, size, cfg.color);
+    });
+    gConnections.selectAll('.connection-line').style('opacity', null);
+    if (geojson) {
+      gDistricts.selectAll('.district-path')
+        .transition().duration(300)
+        .attr('fill', d => REGION_COLORS[getRegion(d)])
+        .style('opacity', 1);
+    }
+    return;
+  }
+
+  // Find matching nodes and districts
+  const matching = new Set();
+  const matchingDistricts = new Set();
+
+  LAYER_CONFIG.forEach(cfg => {
+    if (!cfg.markers) return;
+    cfg.markers.forEach(m => {
+      const crops = m.crops || m.commodities || m.focus || [];
+      if (crops.includes(commodity)) {
+        matching.add(m.name);
+        if (geojson && projection) {
+          for (const f of geojson.features) {
+            if (d3.geoContains(f, [m.lng, m.lat])) {
+              matchingDistricts.add(getDistrictName(f));
+              break;
+            }
+          }
+        }
+      }
+    });
+  });
+
+  (COMMODITY_NODES[commodity] || []).forEach(n => matching.add(n));
+
+  const emoji = commodityEmoji[commodity] || '🌿';
+
+  // Replace matching nodes with emoji, hide non-matching
+  gNodes.selectAll('.node-group').each(function() {
+    const g = d3.select(this);
+    const name = g.attr('data-name');
+    const isMatch = matching.has(name);
+
+    g.style('opacity', isMatch ? 1 : 0.06);
+
+    if (isMatch) {
+      g.select('.node-shape').style('display', 'none');
+      g.select('.node-label').style('display', 'none');
+      // Remove old emoji if any
+      g.select('.commodity-emoji').remove();
+      // Add emoji
+      g.append('text')
+        .attr('class', 'commodity-emoji')
+        .attr('text-anchor', 'middle')
+        .attr('dominant-baseline', 'central')
+        .attr('font-size', '18px')
+        .attr('pointer-events', 'none')
+        .text(emoji);
+    } else {
+      g.select('.node-shape').style('display', 'none');
+      g.select('.node-label').style('display', 'none');
+      g.select('.commodity-emoji').remove();
+    }
+  });
+
+  // Highlight districts
+  if (geojson) {
+    gDistricts.selectAll('.district-path')
+      .transition().duration(300)
+      .attr('fill', function() {
+        const d = d3.select(this).datum();
+        return matchingDistricts.has(getDistrictName(d)) ? commodityColor : '#e2e8e0';
+      })
+      .style('opacity', function() {
+        const d = d3.select(this).datum();
+        return matchingDistricts.has(getDistrictName(d)) ? 0.7 : 0.3;
+      });
+  }
+
+  // Dim connections
+  gConnections.selectAll('.connection-line').each(function() {
+    const from = d3.select(this).attr('data-from');
+    const to = d3.select(this).attr('data-to');
+    const connected = matching.has(from) || matching.has(to);
+    d3.select(this).style('opacity', connected ? 0.7 : 0.03);
+  });
+}
+
+function zoomIn() {
+  svgEl.transition().duration(300).call(zoom.scaleBy, 1.5);
+}
+
+function zoomOut() {
+  svgEl.transition().duration(300).call(zoom.scaleBy, 0.67);
+}
+
+function resetView() {
+  svgEl.transition().duration(750).call(zoom.transform, d3.zoomIdentity);
+  clearHighlights();
+  closeInfoPanel();
+  document.getElementById('search-input').value = '';
+  document.getElementById('commodity-filter').value = '';
+  filterByCommodity();
+}
+
+function togglePanel() {
+  const panel = document.getElementById('panel');
+  const mapEl = document.getElementById('map-container');
+  const btn = document.getElementById('btn-panel');
+  panel.classList.toggle('open');
+  mapEl.classList.toggle('panel-open');
+  btn.classList.toggle('active');
+}
+
+// ─── REGIONS PANEL ─────────────────────────────────────────────────────
+
+let activeRegion = null;
+
+const REGION_DATA = {
+  Northern: {
+    color: REGION_COLORS.Northern,
+    darkColor: REGION_COLORS_DARK.Northern,
+    desc: 'Robusta coffee belt, Lango & Acholi grain basket. Major maize, sesame, and groundnut production.',
+    commodities: ['Coffee','Maize','Sesame','Groundnuts','Cotton'],
+    districts: ['Gulu','Kitgum','Lira','Apac','Kole','Dokolo','Amolatar','Agago','Kotido','Moroto','Nabiratuk','Napak','Amudat','Kaberamaido','Kale']
+  },
+  Eastern: {
+    color: REGION_COLORS.Eastern,
+    darkColor: REGION_COLORS_DARK.Eastern,
+    desc: 'Mt. Elgon Arabica coffee, Teso soybean & groundnut cluster. Soroti-Lira sesame corridor.',
+    commodities: ['Coffee','Sesame','Groundnuts','Maize','Cotton','Tea'],
+    districts: ['Mbale','Tororo','Busia','Soroti','Katakwi','Amuria','Serere','Pallisa','Kamuli','Iganga','Bugiri','Namayingo','Mayuge']
+  },
+  Central: {
+    color: REGION_COLORS.Central,
+    darkColor: REGION_COLORS_DARK.Central,
+    desc: 'Kampala distribution hub, 850+ dry mills, national cold chain & customs clearing. Uganda Coffee headquarters.',
+    commodities: ['Coffee','Maize','Bananas','Vegetables','Mixed'],
+    districts: ['Kampala','Wakiso','Mukono','Luweero','Nakaseke','Nakasongola','Masaka','Mpigi','Kyotera','Kalangala','Rakai','Sembabule','Mityana','Mubende','Kayunga']
+  },
+  Western: {
+    color: REGION_COLORS.Western,
+    darkColor: REGION_COLORS_DARK.Western,
+    desc: 'Albertine region coffee & beans, Banyankole & Nyakatonzi cooperatives, Bunyoro oilseed corridor.',
+    commodities: ['Coffee','Tea','Cotton','Bananas','Beans','Sunflower'],
+    districts: ['Hoima','Masindi','Kiryandongo','Buliisa','Kibaale','Kabarole','Kasese','Bundibugyo','Ntoroko','Kyejojo','Kamwenge','Kakumiro','Kyenjojo']
+  }
+};
+
+function toggleRegionsPanel() {
+  const panel = document.getElementById('regions-panel');
+  const btn = document.getElementById('btn-regions');
+  panel.classList.toggle('open');
+  btn.classList.toggle('active');
+}
+
+function buildRegionsPanel() {
+  const container = document.getElementById('regions-scroll');
+  container.innerHTML = '';
+
+  Object.keys(REGION_DATA).forEach(region => {
+    const data = REGION_DATA[region];
+
+    // Count nodes in this region
+    let nodeCount = 0;
+    let districtCount = 0;
+    const nodesByType = {};
+    LAYER_CONFIG.forEach(cfg => {
+      if (!cfg.markers) return;
+      cfg.markers.forEach(m => {
+        // Match region via getRegion or village/location
+        const nodeRegion = m.village ? getRegionByName(m.village) : getRegionByName(m.name || '');
+        if (nodeRegion === region) {
+          nodeCount++;
+          if (!nodesByType[cfg.id]) nodesByType[cfg.id] = [];
+          nodesByType[cfg.id].push({ name: m.name, color: cfg.color });
+        }
+      });
+    });
+
+    // Count districts from geojson
+    if (geojson) {
+      geojson.features.forEach(f => {
+        if (getRegion(f) === region) districtCount++;
+      });
+    }
+
+    // Build HTML
+    const card = document.createElement('div');
+    card.className = 'region-card';
+    card.style.cssText = `--region-color: ${data.darkColor};`;
+    card.innerHTML = `
+      <div style="position:absolute;top:0;left:0;width:4px;height:100%;background:${data.darkColor};border-radius:10px 0 0 10px;"></div>
+      <div class="region-card-header">
+        <div class="region-card-dot" style="background:${data.darkColor};"></div>
+        <div class="region-card-name">${region}</div>
+        <div class="region-card-badge" style="background:${data.darkColor};">${districtCount} districts</div>
+      </div>
+      <div style="font-size:12px;color:var(--text-secondary);line-height:1.5;margin-bottom:10px;">${data.desc}</div>
+      <div class="region-stats">
+        <div class="region-stat">
+          <div class="region-stat-value">${nodeCount}</div>
+          <div class="region-stat-label">Value Chain Nodes</div>
+        </div>
+        <div class="region-stat">
+          <div class="region-stat-value">${districtCount}</div>
+          <div class="region-stat-label">Districts</div>
+        </div>
+      </div>
+      <div class="region-card-commodities">
+        ${data.commodities.map(c => `<span class="region-commodity-tag">${c}</span>`).join('')}
+      </div>
+      ${nodeCount > 0 ? `
+      <div class="region-card-nodes">
+        <div class="region-card-nodes-title">Key Nodes</div>
+        ${Object.entries(nodesByType).slice(0, 4).map(([typeId, nodes]) => {
+          const cfg = LAYER_CONFIG.find(c => c.id === typeId);
+          return nodes.slice(0, 3).map(n =>
+            `<div class="region-node-row"><div class="region-node-dot" style="background:${n.color};"></div>${n.name}</div>`
+          ).join('');
+        }).join('')}
+      </div>` : ''}
+      <div class="region-zoom-hint">Click to show only ${region}</div>
+    `;
+    card.addEventListener('click', () => zoomToRegion(region));
+    container.appendChild(card);
+  });
+}
+
+function getRegionByName(name) {
+  const n = name.toLowerCase();
+  const regions = {
+    Northern: ['gulu','kitgum','lira','apac','kole','dokolo','amolatar','agago','kotido','moroto','nabiratuk','napak','amudat','kaberamaido','kale','soroti','katakwi','amuria','serere','pallisa','kibuku','budaka'],
+    Eastern: ['mbale','tororo','busia','samia','bukooli','butaleja','iganga','bugiri','namayingo','mayuge','bulambuli','bufumbo','sironko','namisindwa'],
+    Western: ['hoima','masindi','kiryandongo','buliisa','kibaale','kabarole','kasese','bundibugyo','ntoroko','kyejojo','kamwenge','kakumiro','kyenjojo','mbarara','bushenyi'],
+    Central: ['kampala','wakiso','mukono','luweero','nakaseke','nakasongola','masaka','mpigi','kyotera','kalangala','rakai','sembabule','mityana','mubende','kayunga']
+  };
+  for (const [region, districts] of Object.entries(regions)) {
+    if (districts.some(d => n.includes(d))) return region;
+  }
+  if (n.includes('national')) return null;
+  return null;
+}
+
+function zoomToRegion(region) {
+  if (!geojson) return;
+
+  // Toggle active state
+  activeRegion = activeRegion === region ? null : region;
+  document.querySelectorAll('.region-card').forEach(c => c.classList.remove('active'));
+  if (activeRegion) {
+    const cards = document.querySelectorAll('.region-card');
+    const regionNames = Object.keys(REGION_DATA);
+    const idx = regionNames.indexOf(activeRegion);
+    if (idx >= 0 && cards[idx]) cards[idx].classList.add('active');
+  }
+
+  // Highlight selected region, dim others
+  gDistricts.selectAll('.district-path')
+    .transition().duration(300)
+    .attr('fill', function() {
+      if (!activeRegion) return REGION_COLORS[getRegion(this.__data__)];
+      return getRegion(this.__data__) === activeRegion
+        ? REGION_COLORS_DARK[activeRegion]
+        : '#e2e8f0';
+    })
+    .style('opacity', function() {
+      if (!activeRegion) return 1;
+      return getRegion(this.__data__) === activeRegion ? 1 : 0.3;
+    });
+}
+
+// ─── INIT ──────────────────────────────────────────────────────────────
+
+checkWelcome();
+setupSVG();
+
+d3.json('https://raw.githubusercontent.com/has2k1/uganda-boundaries/main/geojson/districts.geojson')
+  .then(data => {
+    document.getElementById('map-loading').style.display = 'none';
+    renderDistricts(data);
+    renderConnections();
+    renderRoads();
+    renderLakes();
+    renderTowns();
+    renderNodes();
+    buildSidebar();
+    buildRegionsPanel();
+  })
+  .catch(err => {
+    document.getElementById('map-loading').innerHTML = `<p style="color:#dc2626;">Failed to load district data. Check your connection.</p>`;
+    console.error('Failed to load GeoJSON:', err);
+  });
+
+window.addEventListener('resize', () => {
+  if (geojson) {
+    renderDistricts(geojson);
+    renderConnections();
+    renderRoads();
+    renderNodes();
+    buildRegionsPanel();
+    gMain.attr('transform', currentTransform);
+  }
+});
+</script>
 </body>
 </html>
