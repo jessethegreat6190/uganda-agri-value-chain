@@ -1048,29 +1048,6 @@ const LAYER_CONFIG = [
       { name:'Lake Edward', coords:[[-0.05,29.55],[-0.10,29.65],[-0.15,29.75],[-0.18,29.85],[-0.15,29.95],[-0.10,30.00],[-0.02,30.00],[0.05,29.95],[0.08,29.85],[0.05,29.70],[0.00,29.60],[-0.05,29.55]], desc:'Queen Elizabeth National Park lake. Fisheries and tourism.' },
       { name:'Lake George', coords:[[-0.25,30.05],[-0.30,30.10],[-0.35,30.15],[-0.38,30.20],[-0.35,30.28],[-0.30,30.30],[-0.22,30.28],[-0.18,30.22],[-0.18,30.15],[-0.20,30.10],[-0.25,30.05]], desc:'Queen Elizabeth National Park. Connected to Lake Edward via Kazinga Channel.' }
     ]
-  },
-  { id: 'towns', label: 'Towns & Cities', color: '#78716c', count: 18, defaultOn: true,
-    towns: true,
-    markers: [
-      { name:'Kampala',       lat:0.3476, lng:32.5825, pop:'1.65M', note:'Capital city. Main commercial hub.' },
-      { name:'Entebbe',       lat:0.0512, lng:32.4637, pop:'70,000', note:'Lake shore town. International airport.' },
-      { name:'Jinja',         lat:0.4244, lng:33.1935, pop:'300,000', note:'Source of the Nile. Industrial town.' },
-      { name:'Mbale',         lat:1.0717, lng:34.1835, pop:'120,000', note:'Eastern regional capital. Coffee hub.' },
-      { name:'Gulu',          lat:2.7747, lng:32.2990, pop:'150,000', note:'Northern regional capital.' },
-      { name:'Lira',          lat:2.2496, lng:32.8998, pop:'130,000', note:'Lango sub-region centre.' },
-      { name:'Mbarara',       lat:-0.6072, lng:30.6544, pop:'100,000', note:'Western regional capital. Ankole hub.' },
-      { name:'Masaka',        lat:-0.3386, lng:29.9344, pop:'110,000', note:'Central-south regional centre.' },
-      { name:'Fort Portal',   lat:0.6710, lng:30.2754, pop:'60,000', note:'Rwenzori gateway. Tourism hub.' },
-      { name:'Soroti',        lat:1.7146, lng:33.6114, pop:'80,000', note:'Teso sub-region capital.' },
-      { name:'Arua',          lat:3.0261, lng:30.9331, pop:'60,000', note:'West Nile regional centre.' },
-      { name:'Moroto',        lat:1.6500, lng:34.5300, pop:'20,000', note:'Karamoja sub-region capital.' },
-      { name:'Kabale',        lat:-1.2481, lng:29.9899, pop:'50,000', note:'Kigezi sub-region capital.' },
-      { name:'Hoima',         lat:1.4332, lng:30.5167, pop:'60,000', note:'Bunyoro sub-region capital. Oil region.' },
-      { name:'Masindi',       lat:1.6822, lng:31.7428, pop:'50,000', note:'Bunyoro sub-region. Agricultural town.' },
-      { name:'Busia',         lat:0.4692, lng:34.0681, pop:'40,000', note:'Kenya-Uganda border crossing.' },
-      { name:'Mukono',        lat:0.3531, lng:32.7558, pop:'100,000', note:'Central Uganda. University town.' },
-      { name:'Tororo',        lat:0.7555, lng:34.1835, pop:'60,000', note:'Eastern border town. Cement industry.' }
-    ]
   }
 ];
 
@@ -1602,48 +1579,6 @@ function renderLakes() {
 
 // ─── RENDER TOWNS ────────────────────────────────────────────────────
 
-function renderTowns() {
-  const townLayer = LAYER_CONFIG.find(l => l.id === 'towns');
-  if (!townLayer || !townLayer.markers) return;
-
-  const gTowns = gMain.append('g').attr('id', 'g-towns');
-
-  townLayer.markers.forEach(t => {
-    const [x, y] = projection([t.lng, t.lat]);
-
-    const grp = gTowns.append('g')
-      .attr('class', 'town-group')
-      .attr('data-layer', 'towns')
-      .attr('transform', `translate(${x},${y})`)
-      .style('cursor', 'default');
-
-    grp.append('circle')
-      .attr('r', 3)
-      .attr('fill', '#57534e')
-      .attr('fill-opacity', 0.7)
-      .attr('stroke', '#fff')
-      .attr('stroke-width', 1);
-
-    grp.append('text')
-      .attr('x', 6)
-      .attr('y', 1)
-      .attr('font-size', '9px')
-      .attr('font-family', "'Fraunces', serif")
-      .attr('fill', '#44403c')
-      .attr('fill-opacity', 0.85)
-      .text(t.name);
-
-    grp.on('mouseover', function() {
-      d3.select(this).select('circle').attr('r', 5).attr('fill-opacity', 1);
-      showTooltip(`${t.name} (pop. ${t.pop}) — ${t.note}`, d3.event || event);
-    })
-    .on('mouseout', function() {
-      d3.select(this).select('circle').attr('r', 3).attr('fill-opacity', 0.7);
-      hideTooltip();
-    });
-  });
-}
-
 // ─── FIND NODE ─────────────────────────────────────────────────────────
 
 function findNode(name) {
@@ -1913,10 +1848,6 @@ function toggleLayer(id, on) {
   }
   if (id === 'lakes') {
     d3.selectAll('.lake-path').style('display', on ? null : 'none');
-    return;
-  }
-  if (id === 'towns') {
-    d3.selectAll('.town-group').style('display', on ? null : 'none');
     return;
   }
   gNodes.selectAll(`.node-group[data-layer="${id}"]`).style('display', on ? null : 'none');
@@ -2321,7 +2252,6 @@ d3.json('districts.geojson')
     renderConnections();
     renderRoads();
     renderLakes();
-    renderTowns();
     renderNodes();
     buildSidebar();
     buildRegionsPanel();
