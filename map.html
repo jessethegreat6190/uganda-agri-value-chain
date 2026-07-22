@@ -33,7 +33,7 @@ html, body { height: 100%; overflow: hidden; font-family: 'Fraunces', Georgia, s
 /* ─── MAP ─────────────────────────────────────────────────────────────── */
 #map-container {
   position: absolute;
-  top: 56px;
+  top: 42px;
   left: 0;
   right: 0;
   bottom: 0;
@@ -106,7 +106,7 @@ html, body { height: 100%; overflow: hidden; font-family: 'Fraunces', Georgia, s
 .topbar {
   position: absolute;
   top: 0; left: 0; right: 0;
-  height: 56px;
+  height: 42px;
   background: var(--surface);
   border-bottom: 1px solid var(--border);
   display: flex;
@@ -170,7 +170,7 @@ html, body { height: 100%; overflow: hidden; font-family: 'Fraunces', Georgia, s
 /* ─── PANEL ───────────────────────────────────────────────────────────── */
 .panel {
   position: absolute;
-  top: 56px; left: 0;
+  top: 42px; left: 0;
   width: var(--panel-width);
   bottom: 0;
   background: var(--surface);
@@ -262,6 +262,20 @@ html, body { height: 100%; overflow: hidden; font-family: 'Fraunces', Georgia, s
 }
 .commodity-select:focus { border-color: var(--primary); }
 .commodity-select option { background: var(--surface); color: var(--text); }
+.settlement-toggle { display: flex; gap: 4px; }
+.settlement-btn {
+  flex: 1; padding: 8px 0; text-align: center;
+  font-size: 12px; font-weight: 600;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: 'Fraunces', Georgia, serif;
+}
+.settlement-btn.active { border-color: var(--primary); color: var(--primary); background: rgba(34,139,34,0.08); }
+.settlement-btn:hover { border-color: var(--primary); }
 
 /* ─── INFO PANEL ──────────────────────────────────────────────────────── */
 #info-panel {
@@ -330,48 +344,6 @@ html, body { height: 100%; overflow: hidden; font-family: 'Fraunces', Georgia, s
 /* ─── BADGE (hidden) ──────────────────────────────────────────────── */
 .sample-badge { display: none; }
 
-/* ─── MAP TITLE OVERLAY ───────────────────────────────────────────────── */
-.map-title-overlay {
-  position: absolute;
-  bottom: 20px; left: 50%; transform: translateX(-50%);
-  z-index: 999;
-  background: rgba(255,255,255,0.95);
-  color: var(--text);
-  padding: 10px 24px;
-  border-radius: 12px;
-  font-size: 14px; font-weight: 500;
-  font-family: 'Fraunces', Georgia, serif;
-  pointer-events: none;
-  white-space: nowrap;
-  box-shadow: var(--shadow-md);
-  border: 1px solid var(--border);
-}
-.map-title-overlay span { color: var(--primary); font-weight: 700; }
-
-/* ─── ZOOM CONTROLS ───────────────────────────────────────────────────── */
-.zoom-controls {
-  position: absolute;
-  top: 72px; right: 16px;
-  z-index: 999;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-.zoom-btn {
-  width: 36px; height: 36px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  display: flex; align-items: center; justify-content: center;
-  cursor: pointer;
-  font-size: 18px; font-weight: 600;
-  color: var(--text-secondary);
-  transition: all 0.15s;
-  font-family: 'Fraunces', Georgia, serif;
-}
-.zoom-btn:first-child { border-radius: var(--radius-sm) var(--radius-sm) 0 0; }
-.zoom-btn:last-child { border-radius: 0 0 var(--radius-sm) var(--radius-sm); }
-.zoom-btn:hover { background: var(--surface-hover); color: var(--primary); }
-
 /* ─── LEGEND ──────────────────────────────────────────────────────────── */
 .legend-item {
   display: flex; align-items: center; gap: 10px;
@@ -412,7 +384,7 @@ html, body { height: 100%; overflow: hidden; font-family: 'Fraunces', Georgia, s
 /* ─── REGIONS PANEL (RIGHT SIDE) ──────────────────────────────────────── */
 .regions-panel {
   position: absolute;
-  top: 56px; right: 0;
+  top: 42px; right: 0;
   width: 320px;
   bottom: 0;
   background: var(--surface);
@@ -803,10 +775,6 @@ html, body { height: 100%; overflow: hidden; font-family: 'Fraunces', Georgia, s
       <span>Layers</span>
     </button>
     <button class="topbar-btn" id="btn-regions" onclick="toggleRegionsPanel()">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
-      <span>Regions</span>
-    </button>
-    <button class="topbar-btn" onclick="resetView()">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
       <span>Reset</span>
     </button>
@@ -834,6 +802,16 @@ html, body { height: 100%; overflow: hidden; font-family: 'Fraunces', Georgia, s
     <div class="panel-section">
       <div class="panel-section-header"><h3>Map Layers</h3><p>Toggle data layers on and off</p></div>
       <div class="panel-section-body"><div class="layer-list" id="layer-toggles"></div></div>
+    </div>
+    <div class="panel-section">
+      <div class="panel-section-header"><h3>Settlement Type</h3></div>
+      <div class="panel-section-body">
+        <div class="settlement-toggle" id="settlement-toggle">
+          <button class="settlement-btn active" data-value="all" onclick="filterBySettlement('all')">All</button>
+          <button class="settlement-btn" data-value="rural" onclick="filterBySettlement('rural')">Rural</button>
+          <button class="settlement-btn" data-value="urban" onclick="filterBySettlement('urban')">Urban</button>
+        </div>
+      </div>
     </div>
     <div class="panel-section">
       <div class="panel-section-header"><h3>Filter by Commodity</h3></div>
@@ -867,12 +845,7 @@ html, body { height: 100%; overflow: hidden; font-family: 'Fraunces', Georgia, s
 
 <!-- MAP -->
 <div id="map-container" class="panel-open">
-  <div class="map-title-overlay"><span>UGANDA</span> Agricultural Value Chain Map — Sources: UCDA, FAO, AFEX, UWRSA, Farmgain Africa</div>
   <div class="map-loading" id="map-loading"><div class="spinner"></div><p>Loading district boundaries...</p></div>
-  <div class="zoom-controls">
-    <button class="zoom-btn" onclick="zoomIn()">+</button>
-    <button class="zoom-btn" onclick="zoomOut()">&#8722;</button>
-  </div>
   <svg id="map-svg"></svg>
   <div class="map-tooltip" id="map-tooltip"></div>
 </div>
@@ -1069,11 +1042,11 @@ const LAYER_CONFIG = [
   { id: 'lakes', label: 'Lakes & Water', color: '#60a5fa', count: 5, defaultOn: true,
     lakes: true,
     features: [
-      { name:'Lake Victoria', coords:[[−0.05,32.50],[−0.10,32.60],[−0.25,32.75],[−0.40,32.85],[−0.50,33.00],[−0.55,33.10],[−0.55,33.20],[−0.50,33.25],[−0.40,33.25],[−0.30,33.15],[−0.20,33.05],[−0.10,32.95],[0.00,32.90],[0.05,32.80],[0.10,32.70],[0.05,32.55],[−0.05,32.50]], desc:'Africa largest lake. Major fisheries and transport route. Shared with Kenya/Tanzania.' },
+      { name:'Lake Victoria', coords:[[-0.05,32.50],[-0.10,32.60],[-0.25,32.75],[-0.40,32.85],[-0.50,33.00],[-0.55,33.10],[-0.55,33.20],[-0.50,33.25],[-0.40,33.25],[-0.30,33.15],[-0.20,33.05],[-0.10,32.95],[0.00,32.90],[0.05,32.80],[0.10,32.70],[0.05,32.55],[-0.05,32.50]], desc:'Africa largest lake. Major fisheries and transport route. Shared with Kenya/Tanzania.' },
       { name:'Lake Albert', coords:[[2.20,30.85],[2.10,30.95],[1.95,31.05],[1.80,31.15],[1.65,31.25],[1.50,31.30],[1.40,31.25],[1.35,31.15],[1.40,31.00],[1.55,30.90],[1.70,30.85],[1.90,30.82],[2.10,30.82],[2.20,30.85]], desc:'Western Uganda border lake. Albertine Rift fisheries. Oil exploration area.' },
       { name:'Lake Kyoga', coords:[[1.50,32.80],[1.60,32.90],[1.70,33.00],[1.65,33.10],[1.55,33.15],[1.40,33.10],[1.30,33.00],[1.25,32.90],[1.30,32.82],[1.40,32.78],[1.50,32.80]], desc:'Central Uganda lake. Nile perch fisheries. Irrigation source for Lango Teso.' },
-      { name:'Lake Edward', coords:[[-0.05,29.55],[−0.10,29.65],[−0.15,29.75],[−0.18,29.85],[−0.15,29.95],[−0.10,30.00],[−0.02,30.00],[0.05,29.95],[0.08,29.85],[0.05,29.70],[0.00,29.60],[−0.05,29.55]], desc:'Queen Elizabeth National Park lake. Fisheries and tourism.' },
-      { name:'Lake George', coords:[[−0.25,30.05],[−0.30,30.10],[−0.35,30.15],[−0.38,30.20],[−0.35,30.28],[−0.30,30.30],[−0.22,30.28],[−0.18,30.22],[−0.18,30.15],[−0.20,30.10],[−0.25,30.05]], desc:'Queen Elizabeth National Park. Connected to Lake Edward via Kazinga Channel.' }
+      { name:'Lake Edward', coords:[[-0.05,29.55],[-0.10,29.65],[-0.15,29.75],[-0.18,29.85],[-0.15,29.95],[-0.10,30.00],[-0.02,30.00],[0.05,29.95],[0.08,29.85],[0.05,29.70],[0.00,29.60],[-0.05,29.55]], desc:'Queen Elizabeth National Park lake. Fisheries and tourism.' },
+      { name:'Lake George', coords:[[-0.25,30.05],[-0.30,30.10],[-0.35,30.15],[-0.38,30.20],[-0.35,30.28],[-0.30,30.30],[-0.22,30.28],[-0.18,30.22],[-0.18,30.15],[-0.20,30.10],[-0.25,30.05]], desc:'Queen Elizabeth National Park. Connected to Lake Edward via Kazinga Channel.' }
     ]
   },
   { id: 'towns', label: 'Towns & Cities', color: '#78716c', count: 18, defaultOn: true,
@@ -1213,10 +1186,8 @@ const REGION_COLORS_DARK = {
 // ─── GLOBALS ───────────────────────────────────────────────────────────
 
 let projection, geoGenerator, svg, gMain, gDistricts, gConnections, gNodes, gHighlights, gCountryOutline;
-let zoom;
 let allNodes = {};
 let selectedNodeName = null;
-let currentTransform = d3.zoomIdentity;
 let currentBasemap = 'white';
 let geojson = null;
 
@@ -1243,15 +1214,6 @@ function setupSVG() {
   gDistricts = gMain.append('g').attr('id', 'g-districts');
   gConnections = gMain.append('g').attr('id', 'g-connections');
   gNodes = gMain.append('g').attr('id', 'g-nodes');
-
-  zoom = d3.zoom()
-    .scaleExtent([0.5, 12])
-    .on('zoom', (event) => {
-      currentTransform = event.transform;
-      gMain.attr('transform', event.transform);
-    });
-
-  svgEl.call(zoom);
 }
 
 // ─── REGION DETECTION ──────────────────────────────────────────────────
@@ -1983,17 +1945,6 @@ function searchNode() {
     if (!cfg.markers) continue;
     for (const m of cfg.markers) {
       if (m.name.toLowerCase().includes(query) || (m.village && m.village.toLowerCase().includes(query)) || (m.location && m.location.toLowerCase().includes(query))) {
-        const pos = projection([m.lng, m.lat]);
-        if (!pos) return;
-        const w = container.clientWidth;
-        const h = container.clientHeight;
-        const scale = 3;
-        const x = w / 2 - pos[0] * scale;
-        const y = h / 2 - pos[1] * scale;
-        svgEl.transition().duration(750).call(
-          zoom.transform,
-          d3.zoomIdentity.translate(x, y).scale(scale)
-        );
         showNodeDetails(m, cfg, { ...m, type: cfg.label, layerId: cfg.id });
         highlightPathway(m.name);
         return;
@@ -2120,16 +2071,7 @@ function filterByCommodity() {
   });
 }
 
-function zoomIn() {
-  svgEl.transition().duration(300).call(zoom.scaleBy, 1.5);
-}
-
-function zoomOut() {
-  svgEl.transition().duration(300).call(zoom.scaleBy, 0.67);
-}
-
 function resetView() {
-  svgEl.transition().duration(750).call(zoom.transform, d3.zoomIdentity);
   clearHighlights();
   closeInfoPanel();
   document.getElementById('search-input').value = '';
@@ -2333,7 +2275,6 @@ window.addEventListener('resize', () => {
     renderRoads();
     renderNodes();
     buildRegionsPanel();
-    gMain.attr('transform', currentTransform);
   }
 });
 </script>
