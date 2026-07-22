@@ -665,39 +665,6 @@ html, body { height: 100%; overflow: hidden; font-family: 'Fraunces', Georgia, s
 }
 .gs-step-text strong { color: var(--text); }
 
-/* ─── TRUST BAR ───────────────────────────────────────────────────── */
-.trust-bar {
-  position: fixed;
-  bottom: 0; left: 0; right: 0;
-  z-index: 998;
-  background: rgba(255,255,255,0.92);
-  border-top: 1px solid var(--border);
-  padding: 8px 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 24px;
-  font-size: 10px;
-  color: var(--text-dim);
-  transition: transform 0.3s ease;
-}
-.trust-bar.hidden { transform: translateY(100%); }
-.trust-bar-item {
-  display: flex; align-items: center; gap: 5px;
-}
-.trust-dot {
-  width: 5px; height: 5px;
-  border-radius: 50%;
-  background: var(--primary);
-}
-.trust-bar a {
-  color: var(--text-secondary);
-  text-decoration: none;
-  font-weight: 600;
-  transition: color 0.15s;
-}
-.trust-bar a:hover { color: var(--primary); }
-
 /* ─── MAP HINT PULSE ──────────────────────────────────────────────── */
 .map-hint {
   position: absolute;
@@ -870,16 +837,6 @@ html, body { height: 100%; overflow: hidden; font-family: 'Fraunces', Georgia, s
 
 <div class="sample-badge">VERIFIED DATA</div>
 
-<!-- TRUST BAR -->
-<div class="trust-bar" id="trust-bar">
-  <div class="trust-bar-item"><div class="trust-dot"></div> UCDA</div>
-  <div class="trust-bar-item"><div class="trust-dot"></div> ESAFF Uganda</div>
-  <div class="trust-bar-item"><div class="trust-dot"></div> AFEX</div>
-  <div class="trust-bar-item"><div class="trust-dot"></div> Farmgain Africa</div>
-  <div class="trust-bar-item"><div class="trust-dot"></div> UWRSA</div>
-  <div class="trust-bar-item" style="margin-left:8px;border-left:1px solid var(--border);padding-left:12px;">July 2026</div>
-</div>
-
 <!-- MAP HINT -->
 <div class="map-hint" id="map-hint">
   <div class="map-hint-dot"></div>
@@ -1018,7 +975,7 @@ const LAYER_CONFIG = [
       { lat: 1.05, lng: 34.27, name:'Malaba Border Post', location:'Tororo', services:['Kenya-Uganda trade','Customs','Inspection'], settlement:'rural', connected:['Mbale Central Market'], desc:'Kenya-Uganda border trade point. Coffee export route.' }
     ]
   },
-  { id: 'processing', label: 'Processing Facilities', color: '#ef4444', count: 5, defaultOn: false,
+  { id: 'processing', label: 'Processing Facilities', color: '#ef4444', count: 5, defaultOn: true,
     markers: [
       { lat: 0.330, lng: 32.588, name:'Kampala Coffee Dry Mills', location:'Kampala', type:'Coffee hulling, Packaging (>850 dry mills nationwide)', settlement:'urban', supply:['Bugisu Cooperative Union','NUCAFE Farmer Groups'], desc:'850+ coffee dry mills in Uganda (UCDA). Processing for export to 40+ countries.' },
       { lat: 0.43, lng: 33.19, name:'Jinja Maize Millers', location:'Jinja', type:'Maize milling, Flour production', settlement:'rural', supply:['Jinja Aggregation Point','Watujo Agro Produce Ltd'], desc:'Busoga region milling hub. Maize flour for domestic and regional markets.' },
