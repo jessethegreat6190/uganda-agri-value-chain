@@ -1,0 +1,46 @@
+{
+  "name": "uganda-agri-value-chain",
+  "version": "1.0.0",
+  "description": "Uganda Agricultural Value Chain Geospatial Information System",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder",
+    "build:win": "electron-builder --win",
+    "build:mac": "electron-builder --mac",
+    "build:linux": "electron-builder --linux",
+    "build:all": "electron-builder -wml"
+  },
+  "build": {
+    "appId": "uganda.agrivalue.chain",
+    "productName": "AgriValue Uganda",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "main.js",
+      "map.html",
+      "index.html",
+      "districts.geojson",
+      "coat-of-arms.png",
+      "manifest.json",
+      "sw.js"
+    ],
+    "win": {
+      "target": ["nsis", "portable"],
+      "icon": "coat-of-arms.png"
+    },
+    "mac": {
+      "target": ["dmg"],
+      "icon": "coat-of-arms.png"
+    },
+    "linux": {
+      "target": ["AppImage", "deb"],
+      "icon": "coat-of-arms.png"
+    }
+  },
+  "devDependencies": {
+    "electron": "^33.0.0",
+    "electron-builder": "^25.0.0"
+  }
+}

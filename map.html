@@ -2,8 +2,16 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Uganda Agricultural Value Chain Map — UCDA, FAO, AFEX, UWRSA, Farmgain Africa</title>
+<meta name="description" content="Interactive geospatial information system mapping Uganda's agricultural value chain — producers, aggregation, warehouses, markets, traders, processing, and logistics.">
+<meta name="theme-color" content="#228B22">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="AgriValue Uganda">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="coat-of-arms.png" type="image/png">
+<link rel="apple-touch-icon" href="coat-of-arms.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;0,9..144,800;1,9..144,400;1,9..144,500&display=swap" rel="stylesheet">
 <script src="https://d3js.org/d3.v7.min.js"></script>
@@ -586,14 +594,51 @@ html, body { height: 100%; overflow: hidden; font-family: 'Fraunces', Georgia, s
 /* ─── RESPONSIVE ──────────────────────────────────────────────────────── */
 @media (max-width: 768px) {
   :root { --panel-width: 100%; }
+  .topbar { height: 48px; padding: 0 10px; gap: 6px; }
   .topbar-brand .title { display: none; }
+  .topbar-brand .logo img { width: 24px; height: 24px; }
   .topbar-search { max-width: none; }
+  .topbar-search input { padding: 10px 12px 10px 34px; font-size: 14px; }
+  .topbar-search .search-hint { display: none; }
+  .topbar-btn { padding: 8px 10px; font-size: 11px; }
   .topbar-btn span { display: none; }
-  .panel { width: 100%; }
-  #info-panel { width: calc(100% - 20px); right: 10px; bottom: 10px; max-height: 40vh; }
-  .sample-badge { top: 68px; right: 8px; font-size: 8px; padding: 3px 10px; }
-  .map-title-overlay { font-size: 11px; padding: 8px 16px; bottom: 12px; }
-  .regions-panel { width: 100%; }
+  .panel { width: 100%; top: 48px; }
+  #map-container { top: 48px; border-width: 2px; }
+  #map-container.panel-open { left: 0; }
+  #info-panel {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    width: 100%;
+    max-height: 55vh;
+    border-radius: var(--radius) var(--radius) 0 0;
+    z-index: 1200;
+  }
+  .info-body { padding: 12px 14px 16px; }
+  .info-body .detail-row { font-size: 12px; }
+  .regions-panel { width: 100%; top: 48px; }
+  .map-hint { bottom: 24px; font-size: 11px; padding: 6px 14px; }
+  .welcome-card { padding: 28px 24px; max-width: 95%; }
+  .welcome-card h1 { font-size: 20px; }
+  .welcome-steps { flex-direction: column; gap: 10px; }
+  .welcome-step { padding: 12px; }
+  .getting-started { padding: 10px 12px; margin-bottom: 8px; }
+  .getting-started h4 { font-size: 11px; }
+  .gs-step-text { font-size: 11px; }
+  .node-label { font-size: 7px; }
+  .sample-badge { top: 56px; right: 8px; font-size: 8px; padding: 3px 10px; }
+  .data-legend { padding: 8px 12px 12px; }
+  .data-legend-item { font-size: 10px; }
+}
+@media (max-width: 480px) {
+  .topbar-search input::placeholder { font-size: 12px; }
+  .panel-section-header { padding: 10px 12px 8px; }
+  .panel-section-body { padding: 0 12px 10px; }
+  #info-panel { max-height: 60vh; }
+  .prov-row { flex-direction: column; gap: 2px; }
+  .prov-value { text-align: left; }
+}
+@media (min-width: 769px) {
+  #map-container.panel-open { left: var(--panel-width); }
 }
 /* ─── WELCOME OVERLAY ──────────────────────────────────────────────── */
 .welcome-overlay {
@@ -1580,6 +1625,12 @@ function renderNodes() {
         showNodeDetails(data, cfg, nodeData);
         highlightPathway(data.name);
       })
+      .on('touchstart', function(event) {
+        event.stopPropagation();
+        event.preventDefault();
+        showNodeDetails(data, cfg, nodeData);
+        highlightPathway(data.name);
+      }, { passive: false })
       .on('mouseenter', function(event) {
         tooltip.innerHTML = `<div class="tt-name">${data.name}</div><div class="tt-detail">${cfg.label}</div>`;
         tooltip.style.display = 'block';
@@ -2338,6 +2389,20 @@ window.addEventListener('resize', () => {
     buildRegionsPanel();
   }
 });
+
+// ─── TOUCH: dismiss tooltip on tap elsewhere ──────────────────────────
+document.addEventListener('touchstart', function(e) {
+  if (!e.target.closest('.node-group')) {
+    tooltip.style.display = 'none';
+  }
+}, { passive: true });
+
+// ─── SERVICE WORKER (PWA) ─────────────────────────────────────────────
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function() {
+    navigator.serviceWorker.register('sw.js').catch(function() {});
+  });
+}
 </script>
 </body>
 </html>

@@ -1,0 +1,19 @@
+{
+  "name": "Uganda AgriValue Chain Map",
+  "short_name": "AgriValue Uganda",
+  "description": "Interactive geospatial information system mapping Uganda's agricultural value chain",
+  "start_url": "./map.html",
+  "display": "standalone",
+  "background_color": "#F5F5E8",
+  "theme_color": "#228B22",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "coat-of-arms.png",
+      "sizes": "any",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["agriculture", "business", "education"]
+}
