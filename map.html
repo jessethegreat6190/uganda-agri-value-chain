@@ -999,7 +999,7 @@ document.addEventListener('click', function hideHintOnce(e) {
 // ─── DATA ──────────────────────────────────────────────────────────────
 
 const LAYER_CONFIG = [
-  { id: 'producers', label: 'Producers / Farmers', color: '#22c55e', count: 12, defaultOn: true,
+  { id: 'producers', label: 'Producers / Farmers', color: '#22c55e', count: 12, defaultOn: false,
     markers: [
       { lat: 1.07, lng: 34.18, name:'Bugisu Cooperative Union', village:'Mbale', crops:['Coffee'], farmers:18000, volume:3200, settlement:'rural', desc:'UCDA-certified Arabica coffee cooperative on Mt. Elgon slopes. Established 1954. ~18,000 members. ~3,200 MT/year. WRS pilot participant.' },
       { lat: -0.15, lng: 29.98, name:'Nyakatonzi Co-operative Union', village:'Kasese/Bushenyi', crops:['Cotton','Coffee'], farmers:15000, volume:4500, settlement:'rural', desc:'Western Uganda cooperative union. 15,000+ members. ~4,500 MT/year cotton & coffee. WRS pilot participant. Soybean & sunflower diversification underway.' },
@@ -1015,7 +1015,7 @@ const LAYER_CONFIG = [
       { lat: 1.44, lng: 31.35, name:'Hoima Coffee Growers Cooperative', village:'Hoima', crops:['Coffee','Beans'], farmers:2800, volume:1500, settlement:'rural', desc:'Albertine region coffee and bean producers. ~1,500 MT/year. Near Lake Albert farming zone.' }
     ]
   },
-  { id: 'aggregation', label: 'Aggregation / Bulking', color: '#f59e0b', count: 6, defaultOn: true,
+  { id: 'aggregation', label: 'Aggregation / Bulking', color: '#f59e0b', count: 6, defaultOn: false,
     markers: [
       { lat: 2.24, lng: 32.90, name:'NAAC Aggregation Hub, Lira', location:'Lira', capacity:'8000', capacityUnit:'MT', settlement:'rural', connected:['Lira Maize & Sesame Farmers Group','Soroti Soybean & Groundnut Farmers'], desc:'National cooperative umbrella aggregation hub for Lango sub-region.' },
       { lat: 1.72, lng: 33.61, name:'Farmgain Bulking Centre, Soroti', location:'Soroti', capacity:'6500', capacityUnit:'MT', settlement:'rural', connected:['Soroti Soybean & Groundnut Farmers'], desc:'Market information system hub. Farmgain Africa partnership for price discovery.' },
@@ -1025,7 +1025,7 @@ const LAYER_CONFIG = [
       { lat: 1.44, lng: 31.35, name:'Hoima Aggregation Hub', location:'Hoima', capacity:'5400', capacityUnit:'MT', settlement:'rural', connected:['Hoima Coffee Growers Cooperative'], desc:'Albertine region aggregation hub for coffee and beans.' }
     ]
   },
-  { id: 'warehouses', label: 'Warehouses / Storage', color: '#3b82f6', count: 12, defaultOn: true,
+  { id: 'warehouses', label: 'Warehouses / Storage', color: '#3b82f6', count: 12, defaultOn: false,
     markers: [
       { lat: 1.36, lng: 34.33, name:'AFEX Smart Warehouse, Bulambuli', location:'Bulambuli', capacity:8000, occupancy:72, settlement:'rural', connected:['Bugisu CU Grading Centre, Mbale'], commodities:['Maize','Sorghum','Soybeans'], desc:'AFEX smart storage facility. Part of 20+ warehouses across Uganda. Digital grain management.' },
       { lat: 1.44, lng: 31.35, name:'AFEX Smart Warehouse, Hoima', location:'Hoima', capacity:6000, occupancy:65, settlement:'rural', connected:['Hoima Aggregation Hub'], commodities:['Maize','Coffee'], desc:'AFEX smart storage. Albertine corridor facility.' },
@@ -1059,7 +1059,7 @@ const LAYER_CONFIG = [
       { lat: 0.61, lng: 33.47, name:'Iganga Market', location:'Iganga', focus:['Maize','Beans'], farmers:1050, traders:58, settlement:'rural', connected:['Jinja Market'], desc:'Busoga sub-region market. Farmgain Africa tracked.' }
     ]
   },
-  { id: 'traders', label: 'Traders / Off-takers', color: '#f97316', count: 10, defaultOn: true,
+  { id: 'traders', label: 'Traders / Off-takers', color: '#f97316', count: 10, defaultOn: false,
     markers: [
       { lat: 0.328, lng: 32.590, name:'UGACOF (Uganda Coffee Company)', residence:'Kampala', tradesAt:'Nakawa Market', commodities:['Coffee'], settlement:'urban', desc:'Major Robusta coffee exporter. UCDA-registered. Top 10 exporter (74% of volume from 10 companies).' },
       { lat: 0.318, lng: 32.572, name:'Olam Uganda', residence:'Kampala', tradesAt:'Nakawa Market', commodities:['Coffee','Grains'], settlement:'urban', desc:'International agribusiness. Coffee & grains exporter. UCDA-registered.' },
@@ -1082,7 +1082,7 @@ const LAYER_CONFIG = [
       { label:'North-Western Corridor (Kampala-Mubende-Fort Portal)', coords:[[0.34,32.58],[0.38,32.30],[0.50,32.00],[0.60,31.70],[0.70,31.30],[0.35,30.27]], desc:'To DRC border. Coffee and tea transport corridor.' }
     ]
   },
-  { id: 'logistics', label: 'Logistics Hubs', color: '#8b5cf6', count: 5, defaultOn: true,
+  { id: 'logistics', label: 'Logistics Hubs', color: '#8b5cf6', count: 5, defaultOn: false,
     markers: [
       { lat: 0.325, lng: 32.570, name:'Kampala National Distribution Hub', location:'Kampala', services:['Central distribution','Cold chain','Customs clearing','Warehouse receipt'], settlement:'urban', connected:['Owino Market (St. Balikuddembe)','Nakawa Market, Kampala'], desc:'National logistics and distribution centre. UWRSA certified. EzyAgric 300K+ farmers.' },
       { lat: 0.40, lng: 33.18, name:'Jinja Transport Hub', location:'Jinja', services:['Eastern corridor','Lake transport','Warehousing'], settlement:'rural', connected:['Jinja Market','Watujo Agro Produce Warehouse, Jinja'], desc:'Lake Victoria transport and logistics hub. Busia/Malaba border access.' },
@@ -1091,7 +1091,7 @@ const LAYER_CONFIG = [
       { lat: 1.05, lng: 34.27, name:'Malaba Border Post', location:'Tororo', services:['Kenya-Uganda trade','Customs','Inspection'], settlement:'rural', connected:['Mbale Central Market'], desc:'Kenya-Uganda border trade point. Coffee export route.' }
     ]
   },
-  { id: 'processing', label: 'Processing Facilities', color: '#ef4444', count: 5, defaultOn: true,
+  { id: 'processing', label: 'Processing Facilities', color: '#ef4444', count: 5, defaultOn: false,
     markers: [
       { lat: 0.330, lng: 32.588, name:'Kampala Coffee Dry Mills', location:'Kampala', type:'Coffee hulling, Packaging (>850 dry mills nationwide)', settlement:'urban', supply:['Bugisu Cooperative Union','NUCAFE Farmer Groups'], desc:'850+ coffee dry mills in Uganda (UCDA). Processing for export to 40+ countries.' },
       { lat: 0.43, lng: 33.19, name:'Jinja Maize Millers', location:'Jinja', type:'Maize milling, Flour production', settlement:'rural', supply:['Jinja Aggregation Point','Watujo Agro Produce Ltd'], desc:'Busoga region milling hub. Maize flour for domestic and regional markets.' },
@@ -1293,16 +1293,16 @@ const MARKET_TRADER_CONNECTIONS = [
 // ─── REGION COLOR MAP ──────────────────────────────────────────────────
 
 const REGION_COLORS = {
-  Northern: '#d4e8d0',
-  Eastern: '#c8dde8',
-  Central: '#f0e4c8',
-  Western: '#ddd0e8'
+  Northern: '#39FF14',
+  Eastern: '#00BFFF',
+  Central: '#FFD700',
+  Western: '#FF69B4'
 };
 const REGION_COLORS_DARK = {
-  Northern: '#228B22',
-  Eastern: '#1B4332',
-  Central: '#40916C',
-  Western: '#52796F'
+  Northern: '#00CC00',
+  Eastern: '#0088FF',
+  Central: '#FFAA00',
+  Western: '#FF1493'
 };
 
 // ─── GLOBALS ───────────────────────────────────────────────────────────
