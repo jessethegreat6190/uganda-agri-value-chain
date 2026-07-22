@@ -639,6 +639,163 @@ html, body { height: 100%; overflow: hidden; font-family: 'Fraunces', Georgia, s
   font-style: italic;
 }
 
+/* ─── INSIGHTS PANEL ─────────────────────────────────────────────────── */
+.insights-panel {
+  position: absolute;
+  top: 42px; right: 0;
+  width: 340px;
+  bottom: 0;
+  background: var(--surface);
+  border-left: 1px solid var(--border);
+  z-index: 1060;
+  display: flex;
+  flex-direction: column;
+  transform: translateX(100%);
+  transition: transform var(--transition);
+  box-shadow: var(--shadow-lg);
+}
+.insights-panel.open { transform: translateX(0); }
+.insights-header {
+  padding: 14px 16px 10px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.insights-header h3 {
+  font-size: 11px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.8px;
+  color: var(--text-dim);
+}
+.insights-close {
+  background: none; border: none; font-size: 16px; cursor: pointer;
+  color: var(--text-dim); padding: 2px 6px; border-radius: 4px;
+  transition: all 0.15s;
+}
+.insights-close:hover { color: var(--text); background: var(--surface-hover); }
+.insights-scroll { flex: 1; overflow-y: auto; padding: 12px; }
+.insights-scroll::-webkit-scrollbar { width: 4px; }
+.insights-scroll::-webkit-scrollbar-track { background: transparent; }
+.insights-scroll::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+.insight-card {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px;
+  margin-bottom: 10px;
+}
+.insight-card-title {
+  font-size: 11px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.6px;
+  color: var(--text-dim);
+  margin-bottom: 10px;
+  display: flex; align-items: center; gap: 6px;
+}
+.insight-card-title .insight-icon { font-size: 14px; }
+.insight-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 5px 0;
+  font-size: 12px;
+  border-bottom: 1px solid rgba(0,0,0,0.04);
+}
+.insight-row:last-child { border-bottom: none; }
+.insight-label { color: var(--text-secondary); }
+.insight-value { font-weight: 600; color: var(--text); font-size: 13px; }
+.insight-bar-container {
+  width: 100%; height: 6px;
+  background: rgba(0,0,0,0.06);
+  border-radius: 3px;
+  margin-top: 6px;
+  overflow: hidden;
+}
+.insight-bar {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.6s cubic-bezier(0.4,0,0.2,1);
+}
+.insight-alert {
+  display: flex; align-items: flex-start; gap: 8px;
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  margin-bottom: 6px;
+  font-size: 12px;
+  line-height: 1.4;
+}
+.insight-alert.warn { background: rgba(217,119,6,0.08); border: 1px solid rgba(217,119,6,0.2); color: #92400e; }
+.insight-alert.ok { background: rgba(22,163,74,0.08); border: 1px solid rgba(22,163,74,0.2); color: #166534; }
+.insight-alert.danger { background: rgba(220,38,38,0.08); border: 1px solid rgba(220,38,38,0.2); color: #991b1b; }
+.insight-alert-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+.insight-summary-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.insight-stat-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 10px;
+  text-align: center;
+}
+.insight-stat-value {
+  font-size: 20px; font-weight: 700;
+  color: var(--text);
+  font-family: 'Fraunces', serif;
+}
+.insight-stat-label {
+  font-size: 9px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.5px;
+  color: var(--text-dim);
+  margin-top: 2px;
+}
+.insight-chain-item {
+  display: flex; align-items: center; gap: 8px;
+  padding: 6px 0;
+  border-bottom: 1px solid rgba(0,0,0,0.04);
+  font-size: 12px;
+}
+.insight-chain-item:last-child { border-bottom: none; }
+.insight-chain-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.insight-chain-name { flex: 1; color: var(--text); font-weight: 500; }
+.insight-chain-count { color: var(--text-dim); font-size: 11px; }
+.insight-chain-status {
+  font-size: 9px; font-weight: 700;
+  text-transform: uppercase;
+  padding: 2px 6px;
+  border-radius: 3px;
+  color: #fff;
+}
+
+/* ─── ENHANCED TOOLTIP ─────────────────────────────────────────────── */
+.map-tooltip {
+  border-left: 3px solid var(--primary);
+}
+.map-tooltip .tt-badge {
+  display: inline-block;
+  font-size: 9px; font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  padding: 1px 6px;
+  border-radius: 3px;
+  color: #fff;
+  margin-bottom: 4px;
+}
+.map-tooltip .tt-stats {
+  display: flex; gap: 10px;
+  margin-top: 4px;
+  padding-top: 4px;
+  border-top: 1px solid var(--border);
+}
+.map-tooltip .tt-stat {
+  font-size: 10px;
+  color: var(--text-dim);
+}
+.map-tooltip .tt-stat strong {
+  color: var(--text-secondary);
+}
+
 /* ─── RESPONSIVE ──────────────────────────────────────────────────────── */
 @media (max-width: 768px) {
   :root { --panel-width: 100%; }
@@ -665,6 +822,7 @@ html, body { height: 100%; overflow: hidden; font-family: 'Fraunces', Georgia, s
   .info-body { padding: 12px 14px 16px; }
   .info-body .detail-row { font-size: 12px; }
   .regions-panel { width: 100%; top: 44px; }
+  .insights-panel { width: 100%; top: 44px; }
   .map-hint { bottom: 24px; font-size: 11px; padding: 6px 14px; }
   .welcome-card { padding: 28px 24px; max-width: 95%; }
   .welcome-card h1 { font-size: 20px; }
@@ -845,6 +1003,10 @@ html, body { height: 100%; overflow: hidden; font-family: 'Fraunces', Georgia, s
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
         <span>Reset</span>
       </button>
+      <button class="topbar-btn" id="btn-insights" onclick="toggleInsightsPanel()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg>
+        <span>Insights</span>
+      </button>
     </div>
   </div>
 </div>
@@ -920,6 +1082,15 @@ html, body { height: 100%; overflow: hidden; font-family: 'Fraunces', Georgia, s
     <button class="regions-close" onclick="toggleRegionsPanel()">&#10005;</button>
   </div>
   <div class="regions-scroll" id="regions-scroll"></div>
+</div>
+
+<!-- INSIGHTS PANEL -->
+<div class="insights-panel" id="insights-panel">
+  <div class="insights-header">
+    <h3>AI Insights</h3>
+    <button class="insights-close" onclick="toggleInsightsPanel()">&#10005;</button>
+  </div>
+  <div class="insights-scroll" id="insights-scroll"></div>
 </div>
 
 <div class="sample-badge">VERIFIED DATA</div>
@@ -1666,7 +1837,16 @@ function renderNodes() {
         highlightPathway(data.name);
       }, { passive: false })
       .on('mouseenter', function(event) {
-        tooltip.innerHTML = `<div class="tt-name">${data.name}</div><div class="tt-detail">${cfg.label}</div>`;
+        let tipHtml = `<div class="tt-badge" style="background:${cfg.color}">${cfg.label}</div><div class="tt-name">${data.name}</div>`;
+        const stats = [];
+        if (data.farmers) stats.push(`<span class="tt-stat"><strong>${data.farmers.toLocaleString()}</strong> farmers</span>`);
+        if (data.volume) stats.push(`<span class="tt-stat"><strong>${data.volume.toLocaleString()}</strong> MT/yr</span>`);
+        if (data.capacity) stats.push(`<span class="tt-stat"><strong>${typeof data.capacity === 'number' ? data.capacity.toLocaleString() : data.capacity}</strong> MT cap</span>`);
+        if (data.traders) stats.push(`<span class="tt-stat"><strong>${data.traders}</strong> traders</span>`);
+        if (data.crops) stats.push(`<span class="tt-stat">${data.crops.join(', ')}</span>`);
+        if (stats.length > 0) tipHtml += `<div class="tt-stats">${stats.join('')}</div>`;
+        if (!stats.length) tipHtml += `<div class="tt-detail">${data.settlement || ''}</div>`;
+        tooltip.innerHTML = tipHtml;
         tooltip.style.display = 'block';
       })
       .on('mousemove', function(event) {
@@ -2404,6 +2584,184 @@ function zoomToRegion(region) {
       if (!activeRegion) return 1;
       return getRegion(this.__data__) === activeRegion ? 1 : 0.3;
     });
+}
+
+// ─── INSIGHTS PANEL ─────────────────────────────────────────────────
+
+let insightsOpen = false;
+
+function toggleInsightsPanel() {
+  const panel = document.getElementById('insights-panel');
+  const btn = document.getElementById('btn-insights');
+  insightsOpen = !insightsOpen;
+  panel.classList.toggle('open', insightsOpen);
+  btn.classList.toggle('active', insightsOpen);
+  if (insightsOpen) buildInsights();
+}
+
+function buildInsights() {
+  const container = document.getElementById('insights-scroll');
+  if (!container) return;
+
+  const allNodes = [];
+  const nodesByLayer = {};
+  const nodesByRegion = { Northern: [], Eastern: [], Central: [], Western: [] };
+  const allConns = [...VALUE_CHAINS, ...MARKET_TRADER_CONNECTIONS];
+
+  LAYER_CONFIG.forEach(cfg => {
+    if (!cfg.markers) return;
+    nodesByLayer[cfg.id] = [];
+    cfg.markers.forEach(m => {
+      const node = { ...m, layerId: cfg.id, layerLabel: cfg.label, layerColor: cfg.color };
+      allNodes.push(node);
+      nodesByLayer[cfg.id].push(node);
+      const region = m.village ? getRegionByName(m.village) : getRegionByName(m.location || m.name || '');
+      if (nodesByRegion[region]) nodesByRegion[region].push(node);
+    });
+  });
+
+  const totalNodes = allNodes.length;
+  const totalConns = allConns.length;
+  const totalFarmers = allNodes.reduce((s, n) => s + (n.farmers || 0), 0);
+  const totalVolume = allNodes.reduce((s, n) => s + (n.volume || 0), 0);
+  const urbanNodes = allNodes.filter(n => n.settlement === 'urban').length;
+  const ruralNodes = allNodes.filter(n => n.settlement === 'rural').length;
+
+  let html = '';
+
+  // Summary grid
+  html += `<div class="insight-card">
+    <div class="insight-card-title"><span class="insight-icon">&#128202;</span> Network Summary</div>
+    <div class="insight-summary-grid">
+      <div class="insight-stat-card"><div class="insight-stat-value">${totalNodes}</div><div class="insight-stat-label">Total Nodes</div></div>
+      <div class="insight-stat-card"><div class="insight-stat-value">${totalConns}</div><div class="insight-stat-label">Connections</div></div>
+      <div class="insight-stat-card"><div class="insight-stat-value">${(totalFarmers/1000).toFixed(0)}K</div><div class="insight-stat-label">Farmers Reached</div></div>
+      <div class="insight-stat-card"><div class="insight-stat-value">${(totalVolume/1000).toFixed(0)}K</div><div class="insight-stat-label">MT/Year Volume</div></div>
+    </div>
+  </div>`;
+
+  // Rural/Urban balance
+  const ruralPct = totalNodes > 0 ? Math.round(ruralNodes / totalNodes * 100) : 0;
+  html += `<div class="insight-card">
+    <div class="insight-card-title"><span class="insight-icon">&#127966;</span> Settlement Balance</div>
+    <div class="insight-row"><span class="insight-label">Rural nodes</span><span class="insight-value">${ruralNodes} (${ruralPct}%)</span></div>
+    <div class="insight-bar-container"><div class="insight-bar" style="width:${ruralPct}%;background:var(--primary);"></div></div>
+    <div class="insight-row" style="margin-top:6px"><span class="insight-label">Urban nodes</span><span class="insight-value">${urbanNodes} (${100-ruralPct}%)</span></div>
+    <div class="insight-bar-container"><div class="insight-bar" style="width:${100-ruralPct}%;background:#8b5cf6;"></div></div>
+    ${ruralPct > 75 ? '<div class="insight-alert warn" style="margin-top:10px"><span class="insight-alert-icon">&#9888;</span>Rural-heavy network. Urban processing/marketing nodes may be bottlenecks.</div>' : ''}
+  </div>`;
+
+  // Regional breakdown
+  html += `<div class="insight-card">
+    <div class="insight-card-title"><span class="insight-icon">&#127758;</span> Regional Distribution</div>`;
+  Object.entries(nodesByRegion).forEach(([region, nodes]) => {
+    if (nodes.length === 0) return;
+    const pct = Math.round(nodes.length / totalNodes * 100);
+    const rc = REGION_COLORS[region] || '#6b7280';
+    html += `<div class="insight-row"><span class="insight-label" style="display:flex;align-items:center;gap:6px"><span style="width:8px;height:8px;border-radius:50%;background:${rc};display:inline-block"></span>${region}</span><span class="insight-value">${nodes.length} nodes (${pct}%)</span></div>
+    <div class="insight-bar-container"><div class="insight-bar" style="width:${pct}%;background:${rc}"></div></div>`;
+  });
+  const regionCounts = Object.entries(nodesByRegion).map(([r, n]) => ({ r, c: n.length }));
+  const maxRegion = regionCounts.reduce((a, b) => a.c > b.c ? a : b);
+  const minRegion = regionCounts.reduce((a, b) => a.c < b.c ? a : b);
+  if (minRegion.c > 0 && maxRegion.c / minRegion.c > 4) {
+    html += `<div class="insight-alert warn" style="margin-top:8px"><span class="insight-alert-icon">&#9888;</span>${maxRegion.r} has ${maxRegion.c}x more nodes than ${minRegion.r}. Consider expanding coverage.</div>`;
+  }
+  html += `</div>`;
+
+  // Layer completeness
+  html += `<div class="insight-card">
+    <div class="insight-card-title"><span class="insight-icon">&#128269;</span> Value Chain Completeness</div>`;
+  const layerOrder = ['producers','aggregation','warehouses','markets','traders','processing'];
+  const layerLabels = { producers:'Producers', aggregation:'Aggregation', warehouses:'Warehouses', markets:'Markets', traders:'Traders', processing:'Processing' };
+  const layerColors = {};
+  LAYER_CONFIG.forEach(cfg => { layerColors[cfg.id] = cfg.color; });
+
+  layerOrder.forEach((lid, i) => {
+    const count = (nodesByLayer[lid] || []).length;
+    const pct = Math.round(count / Math.max(totalNodes, 1) * 100);
+    const color = layerColors[lid] || '#6b7280';
+    html += `<div class="insight-chain-item">
+      <div class="insight-chain-dot" style="background:${color}"></div>
+      <span class="insight-chain-name">${layerLabels[lid]}</span>
+      <span class="insight-chain-count">${count}</span>
+      <div class="insight-bar-container" style="width:60px"><div class="insight-bar" style="width:${pct}%;background:${color}"></div></div>
+    </div>`;
+  });
+  html += `</div>`;
+
+  // Supply gap analysis
+  const producersWithAggregation = new Set();
+  const warehousesWithMarkets = new Set();
+  allConns.forEach(c => {
+    const fromLayer = allNodes.find(n => n.name === c.from)?.layerId;
+    const toLayer = allNodes.find(n => n.name === c.to)?.layerId;
+    if (fromLayer === 'producers' && toLayer === 'aggregation') producersWithAggregation.add(c.from);
+    if (fromLayer === 'warehouses' && toLayer === 'markets') warehousesWithMarkets.add(c.from);
+  });
+
+  const orphanProducers = (nodesByLayer.producers || []).filter(p => !producersWithAggregation.has(p.name));
+  const orphanWarehouses = (nodesByLayer.warehouses || []).filter(w => !warehousesWithMarkets.has(w.name));
+
+  html += `<div class="insight-card">
+    <div class="insight-card-title"><span class="insight-icon">&#9888;</span> Supply Gap Analysis</div>`;
+  if (orphanProducers.length > 0) {
+    html += `<div class="insight-alert danger"><span class="insight-alert-icon">&#128308;</span><div><strong>${orphanProducers.length} producer(s)</strong> lack aggregation links: ${orphanProducers.map(p => p.name).join(', ')}</div></div>`;
+  } else {
+    html += `<div class="insight-alert ok"><span class="insight-alert-icon">&#9989;</span>All producers have aggregation connections.</div>`;
+  }
+  if (orphanWarehouses.length > 0) {
+    html += `<div class="insight-alert warn"><span class="insight-alert-icon">&#9888;</span><div><strong>${orphanWarehouses.length} warehouse(s)</strong> lack market links: ${orphanWarehouses.map(w => w.name).join(', ')}</div></div>`;
+  } else {
+    html += `<div class="insight-alert ok"><span class="insight-alert-icon">&#9989;</span>All warehouses connect to markets.</div>`;
+  }
+  html += `</div>`;
+
+  // Anomaly detection
+  const connectedCount = {};
+  allConns.forEach(c => {
+    connectedCount[c.from] = (connectedCount[c.from] || 0) + 1;
+    connectedCount[c.to] = (connectedCount[c.to] || 0) + 1;
+  });
+  const connValues = Object.values(connectedCount);
+  const avgConn = connValues.length > 0 ? connValues.reduce((a, b) => a + b, 0) / connValues.length : 0;
+  const highConn = Object.entries(connectedCount).filter(([_, c]) => c > avgConn * 2.5);
+  const isolated = allNodes.filter(n => !connectedCount[n.name]);
+
+  html += `<div class="insight-card">
+    <div class="insight-card-title"><span class="insight-icon">&#128161;</span> Anomaly Detection</div>`;
+  if (highConn.length > 0) {
+    html += `<div class="insight-alert warn"><span class="insight-alert-icon">&#9888;</span><div><strong>High-traffic nodes:</strong> ${highConn.map(([name, c]) => `${name} (${c} links)`).join(', ')}</div></div>`;
+  }
+  if (isolated.length > 0) {
+    html += `<div class="insight-alert danger"><span class="insight-alert-icon">&#128308;</span><div><strong>${isolated.length} isolated node(s)</strong> with no connections: ${isolated.map(n => n.name).join(', ')}</div></div>`;
+  }
+  if (highConn.length === 0 && isolated.length === 0) {
+    html += `<div class="insight-alert ok"><span class="insight-alert-icon">&#9989;</span>No anomalies detected. Network is well-connected.</div>`;
+  }
+  html += `<div class="insight-row"><span class="insight-label">Avg connections/node</span><span class="insight-value">${avgConn.toFixed(1)}</span></div>`;
+  html += `<div class="insight-row"><span class="insight-label">Most connected</span><span class="insight-value">${highConn.length > 0 ? highConn[0][0] : 'N/A'}</span></div>`;
+  html += `</div>`;
+
+  // Data quality
+  const provEntries = Object.entries(PROVENANCE);
+  const statusCounts = { verified: 0, reported: 0, estimated: 0, unverified: 0 };
+  provEntries.forEach(([_, p]) => { if (statusCounts[p.dataStatus] !== undefined) statusCounts[p.dataStatus]++; });
+  const verifiedPct = provEntries.length > 0 ? Math.round(statusCounts.verified / provEntries.length * 100) : 0;
+  const qualityPct = provEntries.length > 0 ? Math.round((statusCounts.verified + statusCounts.reported) / provEntries.length * 100) : 0;
+
+  html += `<div class="insight-card">
+    <div class="insight-card-title"><span class="insight-icon">&#128220;</span> Data Quality</div>
+    <div class="insight-row"><span class="insight-label">Verified</span><span class="insight-value" style="color:#16a34a">${statusCounts.verified}</span></div>
+    <div class="insight-row"><span class="insight-label">Reported</span><span class="insight-value" style="color:#2563eb">${statusCounts.reported}</span></div>
+    <div class="insight-row"><span class="insight-label">Estimated</span><span class="insight-value" style="color:#d97706">${statusCounts.estimated}</span></div>
+    <div class="insight-row"><span class="insight-label">Unverified</span><span class="insight-value" style="color:#dc2626">${statusCounts.unverified}</span></div>
+    <div class="insight-row" style="margin-top:6px;border-top:1px solid var(--border);padding-top:8px"><span class="insight-label"><strong>Quality Score</strong></span><span class="insight-value">${qualityPct}%</span></div>
+    <div class="insight-bar-container"><div class="insight-bar" style="width:${qualityPct}%;background:${qualityPct > 50 ? '#16a34a' : '#d97706'}"></div></div>
+    ${qualityPct < 30 ? '<div class="insight-alert warn" style="margin-top:8px"><span class="insight-alert-icon">&#9888;</span>Low data quality. Consider verifying more nodes.</div>' : ''}
+  </div>`;
+
+  container.innerHTML = html;
 }
 
 // ─── INIT ──────────────────────────────────────────────────────────────
