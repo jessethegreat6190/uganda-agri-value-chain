@@ -341,6 +341,60 @@ html, body { height: 100%; overflow: hidden; font-family: 'Fraunces', Georgia, s
   color: #fff; margin-bottom: 10px;
 }
 
+/* ─── PROVENANCE BLOCK ──────────────────────────────────────────────── */
+.prov-block {
+  margin-top: 12px; padding: 10px 12px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+}
+.prov-header {
+  display: flex; align-items: center; gap: 8px;
+  margin-bottom: 8px;
+}
+.prov-badge {
+  display: inline-block;
+  font-size: 10px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.4px;
+  padding: 2px 8px; border-radius: 4px;
+  color: #fff;
+}
+.prov-year {
+  font-size: 11px; color: var(--text-dim); font-weight: 600;
+}
+.prov-row {
+  display: flex; justify-content: space-between; gap: 8px;
+  margin: 3px 0; line-height: 1.4;
+}
+.prov-label {
+  color: var(--text-dim); font-weight: 600;
+  flex-shrink: 0; min-width: 50px;
+}
+.prov-value {
+  color: var(--text-secondary); text-align: right;
+}
+
+/* ─── DATA STATUS LEGEND ──────────────────────────────────────────── */
+.data-legend {
+  padding: 10px 16px 14px;
+  border-top: 1px solid var(--border);
+  font-size: 11px; color: var(--text-dim);
+  line-height: 1.6;
+}
+.data-legend-title {
+  font-weight: 700; font-size: 10px;
+  text-transform: uppercase; letter-spacing: 0.6px;
+  margin-bottom: 4px; color: var(--text-secondary);
+}
+.data-legend-item {
+  display: flex; align-items: center; gap: 6px;
+}
+.data-legend-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  flex-shrink: 0;
+}
+
 /* ─── BADGE (hidden) ──────────────────────────────────────────────── */
 .sample-badge { display: none; }
 
@@ -807,6 +861,13 @@ html, body { height: 100%; overflow: hidden; font-family: 'Fraunces', Georgia, s
       <div class="panel-section-header"><h3>Legend</h3></div>
       <div class="panel-section-body" id="legend"></div>
     </div>
+    <div class="data-legend">
+      <div class="data-legend-title">Data Status</div>
+      <div class="data-legend-item"><span class="data-legend-dot" style="background:#16a34a"></span> Verified — confirmed by official source</div>
+      <div class="data-legend-item"><span class="data-legend-dot" style="background:#2563eb"></span> Reported — provided by organization</div>
+      <div class="data-legend-item"><span class="data-legend-dot" style="background:#d97706"></span> Estimated — derived or approximate</div>
+      <div class="data-legend-item"><span class="data-legend-dot" style="background:#dc2626"></span> Unverified — not independently confirmed</div>
+    </div>
   </div>
 </div>
 
@@ -998,6 +1059,89 @@ const LAYER_CONFIG = [
   }
 ];
 
+const PROVENANCE = {
+  // ─── PRODUCERS ──
+  'Bugisu Cooperative Union':        { source:'ZIP data / Bugisu CU membership records', year:'2024', unit:'MT/year', metric:'Production volume', dataStatus:'unverified' },
+  'Nyakatonzi Co-operative Union':   { source:'ZIP data / Organization-reported', year:'2024', unit:'MT/year', metric:'Production volume', dataStatus:'unverified' },
+  'Banyankole Kweterana Cooperative Union': { source:'ZIP data / Organization-reported', year:'2024', unit:'MT/year', metric:'Production volume', dataStatus:'unverified' },
+  'Muhame Cooperative Society':      { source:'ZIP data / Organization-reported', year:'2024', unit:'MT/year', metric:'Production volume', dataStatus:'unverified' },
+  'NUCAFE Farmer Groups':            { source:'NUCAFE official communications (1.5M farmers, 200+ associations)', year:'2024', unit:'MT/year', metric:'Production volume (aggregate estimate)', dataStatus:'reported' },
+  'ESAFF Uganda':                    { source:'ESAFF Uganda registration data (12,588 community orgs, 54 districts)', year:'2024', unit:'MT/year', metric:'Production volume (aggregate estimate)', dataStatus:'reported' },
+  'NAAC':                            { source:'ZIP data / Organization-reported (500,000+ farmers)', year:'2024', unit:'MT/year', metric:'Production volume (aggregate estimate)', dataStatus:'unverified' },
+  'Gulu Coffee Farmers Cooperative': { source:'ZIP data / Organization-reported', year:'2024', unit:'MT/year', metric:'Production volume', dataStatus:'unverified' },
+  'Soroti Soybean & Groundnut Farmers': { source:'ZIP data / Organization-reported', year:'2024', unit:'MT/year', metric:'Production volume', dataStatus:'unverified' },
+  'Lira Maize & Sesame Farmers Group':  { source:'ZIP data / Organization-reported', year:'2024', unit:'MT/year', metric:'Production volume', dataStatus:'unverified' },
+  'Arua Cassava & Bean Producers':   { source:'ZIP data / Organization-reported', year:'2024', unit:'MT/year', metric:'Production volume', dataStatus:'unverified' },
+  'Hoima Coffee Growers Cooperative': { source:'ZIP data / Organization-reported', year:'2024', unit:'MT/year', metric:'Production volume', dataStatus:'unverified' },
+  // ─── AGGREGATION ──
+  'NAAC Aggregation Hub, Lira':      { source:'ZIP data', year:'2024', unit:'MT', metric:'Aggregation capacity', dataStatus:'unverified' },
+  'Farmgain Bulking Centre, Soroti': { source:'ZIP data / Farmgain Africa', year:'2024', unit:'MT', metric:'Bulking capacity', dataStatus:'unverified' },
+  'Bugisu CU Grading Centre, Mbale': { source:'ZIP data / UCDA-certified grading centre', year:'2024', unit:'MT', metric:'Grading capacity', dataStatus:'unverified' },
+  'Jinja Aggregation Point':         { source:'ZIP data', year:'2024', unit:'MT', metric:'Aggregation capacity', dataStatus:'unverified' },
+  'Masindi Bulking Shed':            { source:'ZIP data', year:'2024', unit:'MT', metric:'Bulking capacity', dataStatus:'unverified' },
+  'Hoima Aggregation Hub':           { source:'ZIP data', year:'2024', unit:'MT', metric:'Aggregation capacity', dataStatus:'unverified' },
+  // ─── WAREHOUSES ──
+  'AFEX Smart Warehouse, Bulambuli': { source:'ZIP data / AFEX publicly reported 200+ warehouses', year:'2024', unit:'MT', metric:'Storage capacity', dataStatus:'unverified' },
+  'AFEX Smart Warehouse, Hoima':     { source:'ZIP data / AFEX publicly reported 200+ warehouses', year:'2024', unit:'MT', metric:'Storage capacity', dataStatus:'unverified' },
+  'AFEX Smart Warehouse, Kampala':   { source:'ZIP data / AFEX publicly reported 200+ warehouses', year:'2024', unit:'MT', metric:'Storage capacity', dataStatus:'unverified' },
+  'AFEX Smart Warehouse, Kigumba':   { source:'ZIP data / AFEX publicly reported 200+ warehouses', year:'2024', unit:'MT', metric:'Storage capacity', dataStatus:'unverified' },
+  'AFEX Smart Warehouse, Lira':      { source:'ZIP data / AFEX publicly reported 200+ warehouses', year:'2024', unit:'MT', metric:'Storage capacity', dataStatus:'unverified' },
+  'AFEX Smart Warehouse, Masindi':   { source:'ZIP data / AFEX publicly reported 200+ warehouses', year:'2024', unit:'MT', metric:'Storage capacity', dataStatus:'unverified' },
+  'UWRSA Certified Warehouse, Kampala': { source:'ZIP data / UWRSA framework', year:'2024', unit:'MT', metric:'Storage capacity', dataStatus:'unverified' },
+  'Afro Kai Warehouse, Kampala':     { source:'ZIP data / Afro Kai Ltd (43,000+ MT capacity)', year:'2024', unit:'MT', metric:'Storage capacity', dataStatus:'unverified' },
+  'Watujo Agro Produce Warehouse, Jinja': { source:'ZIP data', year:'2024', unit:'MT', metric:'Storage capacity', dataStatus:'unverified' },
+  'AFEX Smart Warehouse, Mbale':     { source:'ZIP data / AFEX publicly reported 200+ warehouses', year:'2024', unit:'MT', metric:'Storage capacity', dataStatus:'unverified' },
+  'AFEX Smart Warehouse, Soroti':    { source:'ZIP data / AFEX publicly reported 200+ warehouses', year:'2024', unit:'MT', metric:'Storage capacity', dataStatus:'unverified' },
+  'AFEX Smart Warehouse, Mbarara':   { source:'ZIP data / AFEX publicly reported 200+ warehouses', year:'2024', unit:'MT', metric:'Storage capacity', dataStatus:'unverified' },
+  // ─── MARKETS ──
+  'Owino Market (St. Balikuddembe)': { source:'Farmgain Africa price tracking / KCCA', year:'2024', unit:'traders', metric:'Market trader count', dataStatus:'estimated' },
+  'Nakawa Market, Kampala':          { source:'Farmgain Africa price tracking / KCCA', year:'2024', unit:'traders', metric:'Market trader count', dataStatus:'estimated' },
+  'Kalerwe Market, Kampala':         { source:'Farmgain Africa price tracking / KCCA', year:'2024', unit:'traders', metric:'Market trader count', dataStatus:'estimated' },
+  'Gulu Main Market':                { source:'Farmgain Africa price tracking', year:'2024', unit:'traders', metric:'Market trader count', dataStatus:'estimated' },
+  'Mbale Central Market':            { source:'Farmgain Africa price tracking', year:'2024', unit:'traders', metric:'Market trader count', dataStatus:'estimated' },
+  'Jinja Market':                    { source:'Farmgain Africa price tracking', year:'2024', unit:'traders', metric:'Market trader count', dataStatus:'estimated' },
+  'Masindi Market':                  { source:'Farmgain Africa price tracking', year:'2024', unit:'traders', metric:'Market trader count', dataStatus:'estimated' },
+  'Soroti Market':                   { source:'Farmgain Africa price tracking', year:'2024', unit:'traders', metric:'Market trader count', dataStatus:'estimated' },
+  'Lira Market':                     { source:'Farmgain Africa price tracking', year:'2024', unit:'traders', metric:'Market trader count', dataStatus:'estimated' },
+  'Masaka Market':                   { source:'Farmgain Africa price tracking', year:'2024', unit:'traders', metric:'Market trader count', dataStatus:'estimated' },
+  'Mbarara Market':                  { source:'Farmgain Africa price tracking', year:'2024', unit:'traders', metric:'Market trader count', dataStatus:'estimated' },
+  'Arua Market':                     { source:'Farmgain Africa price tracking', year:'2024', unit:'traders', metric:'Market trader count', dataStatus:'estimated' },
+  'Moroto Market':                   { source:'Farmgain Africa price tracking', year:'2024', unit:'traders', metric:'Market trader count', dataStatus:'estimated' },
+  'Iganga Market':                   { source:'Farmgain Africa price tracking', year:'2024', unit:'traders', metric:'Market trader count', dataStatus:'estimated' },
+  // ─── TRADERS ──
+  'UGACOF (Uganda Coffee Company)':  { source:'UCDA-registered exporter / Company-reported', year:'2024', unit:'N/A', metric:'Trading company', dataStatus:'reported' },
+  'Olam Uganda':                     { source:'UCDA-registered / Company-reported', year:'2024', unit:'N/A', metric:'Trading company', dataStatus:'reported' },
+  'Mwanyi Uganda Coffee Exporters':  { source:'UCDA-registered exporter / Company-reported', year:'2024', unit:'N/A', metric:'Trading company', dataStatus:'reported' },
+  'Imbari Coffee Inc.':             { source:'UCDA-registered exporter / Company-reported', year:'2024', unit:'N/A', metric:'Trading company', dataStatus:'reported' },
+  'Mukwano Industries':             { source:'Company-reported / Public records', year:'2024', unit:'N/A', metric:'Trading / processing company', dataStatus:'reported' },
+  'Nile Agro Industries':           { source:'ZIP data / Company-reported (50+ facilities in Lira)', year:'2024', unit:'N/A', metric:'Trading / processing company', dataStatus:'reported' },
+  'Mount Meru Millers':             { source:'Company-reported / Public records', year:'2024', unit:'N/A', metric:'Trading / processing company', dataStatus:'reported' },
+  'Afrokai Limited':                { source:'ZIP data / Company-reported (43,000+ MT capacity)', year:'2024', unit:'N/A', metric:'Trading company', dataStatus:'reported' },
+  'Bettagrains Limited':            { source:'ZIP data / Company-reported', year:'2024', unit:'N/A', metric:'Trading company', dataStatus:'reported' },
+  'Watujo Agro Produce Ltd':        { source:'ZIP data / Company-reported', year:'2024', unit:'N/A', metric:'Trading company', dataStatus:'reported' },
+  // ─── LOGISTICS ──
+  'Kampala National Distribution Hub': { source:'ZIP data / UWRSA framework', year:'2024', unit:'N/A', metric:'Logistics hub', dataStatus:'reported' },
+  'Jinja Transport Hub':            { source:'ZIP data', year:'2024', unit:'N/A', metric:'Logistics hub', dataStatus:'reported' },
+  'Gulu Transit Centre':            { source:'ZIP data', year:'2024', unit:'N/A', metric:'Logistics hub', dataStatus:'reported' },
+  'Busia Border Post':              { source:'Verified border post / Kenya-Uganda trade', year:'2024', unit:'N/A', metric:'Border trade point', dataStatus:'verified' },
+  'Malaba Border Post':             { source:'Verified border post / Kenya-Uganda trade', year:'2024', unit:'N/A', metric:'Border trade point', dataStatus:'verified' },
+  // ─── PROCESSING ──
+  'Kampala Coffee Dry Mills':       { source:'UCDA data (850+ dry mills nationwide verified)', year:'2024', unit:'N/A', metric:'Processing facility', dataStatus:'reported' },
+  'Jinja Maize Millers':            { source:'ZIP data', year:'2024', unit:'N/A', metric:'Processing facility', dataStatus:'reported' },
+  'Mbarara Coffee Wet Mill':        { source:'UCDA data (35 wet mills deployed)', year:'2024', unit:'N/A', metric:'Processing facility', dataStatus:'reported' },
+  'Mbale Arabica Wet Mill':         { source:'UCDA data (35 wet mills deployed)', year:'2024', unit:'N/A', metric:'Processing facility', dataStatus:'reported' },
+  'Lira Sunflower Oil Mills':       { source:'ZIP data / GOAL Uganda report (50+ facilities in Lira)', year:'2024', unit:'N/A', metric:'Processing facility', dataStatus:'reported' },
+  // ─── SECONDARY MARKETS ──
+  'Kampala Central Retail Hub':     { source:'ZIP data / Conceptual aggregation', year:'2024', unit:'N/A', metric:'Retail distribution hub', dataStatus:'estimated' },
+  'Kampala Export Processing Zone': { source:'ZIP data', year:'2024', unit:'N/A', metric:'Export aggregation zone', dataStatus:'estimated' },
+  'Entebbe Lake Transport Hub':     { source:'ZIP data', year:'2024', unit:'N/A', metric:'Lake transport / export node', dataStatus:'estimated' },
+  'Busia Cross-Border Market':      { source:'ZIP data / Verified cross-border trade point', year:'2024', unit:'traders', metric:'Cross-border market trader count', dataStatus:'estimated' },
+  'Mbale Cross-Border Market':      { source:'ZIP data / Verified cross-border trade point', year:'2024', unit:'traders', metric:'Cross-border market', dataStatus:'estimated' },
+  'Gulu Northern Distribution':     { source:'ZIP data', year:'2024', unit:'N/A', metric:'Regional distribution centre', dataStatus:'estimated' },
+  'Mbarara Regional Distribution':  { source:'ZIP data', year:'2024', unit:'N/A', metric:'Regional distribution centre', dataStatus:'estimated' },
+  'Soroti Regional Distribution':   { source:'ZIP data', year:'2024', unit:'N/A', metric:'Regional distribution centre', dataStatus:'estimated' }
+};
+
 const COMMODITY_NODES = {
   'Coffee': ['Bugisu Cooperative Union','Banyankole Kweterana Cooperative Union','Muhame Cooperative Society','Gulu Coffee Farmers Cooperative','NUCAFE Farmer Groups','Hoima Coffee Growers Cooperative','UGACOF (Uganda Coffee Company)','Olam Uganda','Mwanyi Uganda Coffee Exporters','Imbari Coffee Inc.','Kampala Coffee Dry Mills','Mbarara Coffee Wet Mill','Mbale Arabica Wet Mill'],
   'Maize': ['Gulu Coffee Farmers Cooperative','Lira Maize & Sesame Farmers Group','Masindi Bulking Shed','Jinja Aggregation Point','AFEX Smart Warehouse, Kigumba','AFEX Smart Warehouse, Masindi','Jinja Maize Millers','Watujo Agro Produce Ltd','Bettagrains Limited'],
@@ -1013,8 +1157,7 @@ const COMMODITY_NODES = {
   'Grains': ['Afrokai Limited','Bettagrains Limited','Owino Market (St. Balikuddembe)','Kampala Central Retail Hub'],
   'Tea': ['Nyakatonzi Co-operative Union','Mbarara Coffee Wet Mill','Mbarara Regional Distribution'],
   'Bananas': ['Masaka Market','Banyankole Kweterana Cooperative Union','Mbarara Coffee Wet Mill','Mbarara Regional Distribution'],
-  'Mixed': ['NAAC','ESAFF Uganda'],
-  'Secondary Markets': ['Kampala Central Retail Hub','Kampala Export Processing Zone','Entebbe Lake Transport Hub','Busia Cross-Border Market','Mbale Cross-Border Market','Gulu Northern Distribution','Mbarara Regional Distribution','Soroti Regional Distribution']
+  'Mixed': ['NAAC','ESAFF Uganda']
 };
 
 const VALUE_CHAINS = [
@@ -1625,7 +1768,22 @@ function showNodeDetails(data, layerCfg, nodeData) {
   if (data.supply) html += `<div class="detail-row"><strong>Supply Areas:</strong> ${data.supply.join(', ')}</div>`;
   if (data.connected) html += `<div class="detail-row"><strong>Connected to:</strong> ${data.connected.join(', ')}</div>`;
   if (data.desc) html += `<div class="detail-row"><strong>Description:</strong> ${data.desc}</div>`;
-  html += `<div class="detail-row"><strong>GPS:</strong> ${data.lat.toFixed(4)}&deg;N, ${data.lng.toFixed(4)}&deg;E</div>`;
+  html += `<div class="detail-row"><strong>GPS:</strong> ${data.lat.toFixed(4)}&deg;, ${data.lng.toFixed(4)}&deg;</div>`;
+
+  // Provenance block
+  const prov = PROVENANCE[data.name];
+  if (prov) {
+    const statusColors = { verified:'#16a34a', reported:'#2563eb', estimated:'#d97706', unverified:'#dc2626' };
+    const statusLabels = { verified:'Verified', reported:'Reported', estimated:'Estimated', unverified:'Unverified' };
+    const st = prov.dataStatus || 'unverified';
+    const sc = statusColors[st] || '#6b7280';
+    html += `<div class="prov-block">`;
+    html += `<div class="prov-header"><span class="prov-badge" style="background:${sc}">${statusLabels[st] || st}</span><span class="prov-year">${prov.year || ''}</span></div>`;
+    if (prov.metric) html += `<div class="prov-row"><span class="prov-label">Metric</span><span class="prov-value">${prov.metric}</span></div>`;
+    if (prov.unit && prov.unit !== 'N/A') html += `<div class="prov-row"><span class="prov-label">Unit</span><span class="prov-value">${prov.unit}</span></div>`;
+    html += `<div class="prov-row"><span class="prov-label">Source</span><span class="prov-value">${prov.source || 'Not provided'}</span></div>`;
+    html += `</div>`;
+  }
 
   // Pathway
   const allConnections = [...VALUE_CHAINS, ...MARKET_TRADER_CONNECTIONS];
