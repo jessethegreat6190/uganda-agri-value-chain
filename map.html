@@ -32,7 +32,7 @@
   --shadow-lg: 0 8px 30px rgba(27,67,50,0.12);
   --radius: 10px;
   --radius-sm: 6px;
-  --panel-width: 340px;
+  --panel-width: 310px;
   --transition: 0.3s cubic-bezier(0.4,0,0.2,1);
 }
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -304,10 +304,10 @@ html, body { height: 100%; overflow: hidden; font-family: 'Fraunces', Georgia, s
 /* ─── INFO PANEL ──────────────────────────────────────────────────────── */
 #info-panel {
   position: absolute;
-  bottom: 20px; right: 20px;
+  top: 50px; right: 12px;
   z-index: 1000;
-  width: 360px;
-  max-height: 55vh;
+  width: 340px;
+  max-height: calc(100vh - 70px);
   background: var(--surface);
   border-radius: var(--radius);
   box-shadow: var(--shadow-lg);
@@ -417,6 +417,38 @@ html, body { height: 100%; overflow: hidden; font-family: 'Fraunces', Georgia, s
 .data-legend-dot {
   width: 7px; height: 7px; border-radius: 50%;
   flex-shrink: 0;
+}
+
+/* ─── FLOATING MAP LEGEND ──────────────────────────────────────────── */
+.map-legend {
+  position: absolute;
+  bottom: 12px; left: 12px;
+  background: rgba(255,255,255,0.95);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 10px 14px;
+  z-index: 900;
+  max-width: 280px;
+  box-shadow: var(--shadow-md);
+  font-size: 11px;
+}
+.map-legend-title {
+  font-size: 10px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.6px;
+  color: var(--text-dim);
+  margin-bottom: 6px;
+}
+.map-legend-items { display: flex; flex-direction: column; gap: 3px; }
+.map-legend-row {
+  display: flex; align-items: center; gap: 8px;
+  color: var(--text-secondary); line-height: 1.4;
+}
+.map-legend-symbol {
+  width: 18px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+}
+.map-legend-dash {
+  width: 18px; height: 3px; border-radius: 2px;
 }
 
 /* ─── BADGE (hidden) ──────────────────────────────────────────────── */
@@ -624,10 +656,10 @@ html, body { height: 100%; overflow: hidden; font-family: 'Fraunces', Georgia, s
   #map-container.panel-open { left: 0; }
   #info-panel {
     position: fixed;
-    bottom: 0; left: 0; right: 0;
-    width: 100%;
-    max-height: 55vh;
-    border-radius: var(--radius) var(--radius) 0 0;
+    top: 50px; right: 8px; left: 8px;
+    width: auto;
+    max-height: 45vh;
+    border-radius: var(--radius);
     z-index: 1200;
   }
   .info-body { padding: 12px 14px 16px; }
@@ -857,17 +889,6 @@ html, body { height: 100%; overflow: hidden; font-family: 'Fraunces', Georgia, s
         </select>
       </div>
     </div>
-    <div class="panel-section">
-      <div class="panel-section-header"><h3>Legend</h3></div>
-      <div class="panel-section-body" id="legend"></div>
-    </div>
-    <div class="data-legend">
-      <div class="data-legend-title">Data Status</div>
-      <div class="data-legend-item"><span class="data-legend-dot" style="background:#16a34a"></span> Verified — confirmed by official source</div>
-      <div class="data-legend-item"><span class="data-legend-dot" style="background:#2563eb"></span> Reported — provided by organization</div>
-      <div class="data-legend-item"><span class="data-legend-dot" style="background:#d97706"></span> Estimated — derived or approximate</div>
-      <div class="data-legend-item"><span class="data-legend-dot" style="background:#dc2626"></span> Unverified — not independently confirmed</div>
-    </div>
   </div>
 </div>
 
@@ -876,6 +897,11 @@ html, body { height: 100%; overflow: hidden; font-family: 'Fraunces', Georgia, s
   <div class="map-loading" id="map-loading"><div class="spinner"></div><p>Loading district boundaries...</p></div>
   <svg id="map-svg"></svg>
   <div class="map-tooltip" id="map-tooltip"></div>
+  <!-- FLOATING LEGEND -->
+  <div class="map-legend" id="map-legend">
+    <div class="map-legend-title">Map Key</div>
+    <div class="map-legend-items" id="map-legend-items"></div>
+  </div>
 </div>
 
 <!-- INFO PANEL -->
@@ -1236,15 +1262,15 @@ const MARKET_TRADER_CONNECTIONS = [
 // ─── REGION COLOR MAP ──────────────────────────────────────────────────
 
 const REGION_COLORS = {
-  Northern: '#39FF14',
+  Northern: '#FF4500',
   Eastern: '#00BFFF',
   Central: '#FFD700',
   Western: '#FF69B4'
 };
 const REGION_COLORS_DARK = {
-  Northern: '#00CC00',
+  Northern: '#CC3300',
   Eastern: '#0088FF',
-  Central: '#FFAA00',
+  Central: '#DAA520',
   Western: '#FF1493'
 };
 
@@ -1934,47 +1960,42 @@ function buildSidebar() {
 }
 
 function buildLegend() {
-  const legend = document.getElementById('legend');
-  legend.innerHTML = '';
+  const container = document.getElementById('map-legend-items');
+  if (!container) return;
+  container.innerHTML = '';
   const items = [
-    { label: 'Coffee Cooperatives (Bugisu CU, Nyakatonzi, Banyankole KW)', color: '#22c55e', cls: 'circle' },
-    { label: 'Aggregation & Bulking Centres (NAAC, Farmgain, Bugisu CU)', color: '#f59e0b', cls: 'diamond' },
-    { label: 'AFEX & UWRSA Certified Warehouses', color: '#3b82f6', cls: 'square' },
-    { label: 'Owino, Nakawa, Kalerwe, Gulu, Mbale Markets', color: '#1a7f5a', cls: 'circle-lg' },
-    { label: 'UGACOF, Olam, Mwanyi, Mukwano Traders', color: '#f97316', cls: 'triangle' },
-    { label: 'Northern, Eastern, Western, North-Western Corridors', color: '#6b7280', cls: 'line' },
-    { label: 'Kampala, Jinja, Gulu, Busia, Malaba Hubs', color: '#8b5cf6', cls: 'hexagon' },
-    { label: 'Kampala Dry Mills, Jinja, Lira, Mbale Processors', color: '#ef4444', cls: 'star' },
-    { label: 'Cooperatives supply to Grading & Bulking', color: '#22c55e', cls: 'dash' },
-    { label: 'Bulking feeds into AFEX & UWRSA Storage', color: '#f59e0b', cls: 'dash' },
-    { label: 'Warehouses distribute to Primary Markets', color: '#3b82f6', cls: 'dash' },
-    { label: 'Markets supply to Export & Processing', color: '#f97316', cls: 'dash' }
+    { label: 'Producers / Farmers', color: '#22c55e', cls: 'circle' },
+    { label: 'Aggregation & Bulking', color: '#f59e0b', cls: 'diamond' },
+    { label: 'Warehouses / Storage', color: '#3b82f6', cls: 'square' },
+    { label: 'Primary Markets', color: '#1a7f5a', cls: 'circle-lg' },
+    { label: 'Traders / Off-takers', color: '#f97316', cls: 'triangle' },
+    { label: 'Logistics Hubs', color: '#8b5cf6', cls: 'hexagon' },
+    { label: 'Processing Facilities', color: '#ef4444', cls: 'star' },
+    { label: 'Value-Chain Flow', color: '#6b7280', cls: 'dash' }
   ];
 
   items.forEach(item => {
     const div = document.createElement('div');
-    div.className = 'legend-item';
+    div.className = 'map-legend-row';
     let symbolHtml = '';
     if (item.cls === 'dash') {
-      symbolHtml = `<div style="width:16px;height:0;border-top:2px dashed ${item.color};"></div>`;
-    } else if (item.cls === 'line') {
-      symbolHtml = `<div style="width:16px;height:0;border-top:2px solid ${item.color};border-style:dashed;"></div>`;
+      symbolHtml = `<div class="map-legend-dash" style="background:repeating-linear-gradient(90deg,${item.color} 0,${item.color} 5px,transparent 5px,transparent 8px);"></div>`;
     } else if (item.cls === 'circle' || item.cls === 'circle-lg') {
       const r = item.cls === 'circle-lg' ? 6 : 5;
-      symbolHtml = `<svg width="12" height="12"><circle cx="6" cy="6" r="${r}" fill="${item.color}"/></svg>`;
+      symbolHtml = `<svg width="14" height="14"><circle cx="7" cy="7" r="${r}" fill="${item.color}"/></svg>`;
     } else if (item.cls === 'diamond') {
-      symbolHtml = `<div style="width:9px;height:9px;clip-path:polygon(50% 0%,100% 50%,50% 100%,0% 50%);background:${item.color};"></div>`;
+      symbolHtml = `<svg width="14" height="14"><rect x="3" y="3" width="8" height="8" fill="${item.color}" transform="rotate(45 7 7)"/></svg>`;
     } else if (item.cls === 'square') {
-      symbolHtml = `<div style="width:9px;height:9px;background:${item.color};border-radius:2px;"></div>`;
+      symbolHtml = `<svg width="14" height="14"><rect x="3" y="3" width="8" height="8" fill="${item.color}" rx="1"/></svg>`;
     } else if (item.cls === 'triangle') {
-      symbolHtml = `<div style="width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-bottom:9px solid ${item.color};"></div>`;
+      symbolHtml = `<svg width="14" height="14"><polygon points="7,1 13,13 1,13" fill="${item.color}"/></svg>`;
     } else if (item.cls === 'hexagon') {
-      symbolHtml = `<div style="width:10px;height:9px;clip-path:polygon(25% 0%,75% 0%,100% 50%,75% 100%,25% 100%,0% 50%);background:${item.color};"></div>`;
+      symbolHtml = `<svg width="14" height="14"><polygon points="7,1 12.5,4 12.5,10 7,13 1.5,10 1.5,4" fill="${item.color}"/></svg>`;
     } else if (item.cls === 'star') {
-      symbolHtml = `<div style="width:10px;height:10px;clip-path:polygon(50% 0%,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%);background:${item.color};"></div>`;
+      symbolHtml = `<svg width="14" height="14"><polygon points="7,1 8.5,5.5 13,5.5 9.5,8.5 10.5,13 7,10 3.5,13 4.5,8.5 1,5.5 5.5,5.5" fill="${item.color}"/></svg>`;
     }
-    div.innerHTML = `<div class="legend-symbol">${symbolHtml}</div><span>${item.label}</span>`;
-    legend.appendChild(div);
+    div.innerHTML = `<div class="map-legend-symbol">${symbolHtml}</div><span>${item.label}</span>`;
+    container.appendChild(div);
   });
 }
 
@@ -2389,6 +2410,16 @@ d3.json('districts.geojson')
     renderNodes();
     buildSidebar();
     buildRegionsPanel();
+    // Apply defaultOn state to hide layers that should be off
+    LAYER_CONFIG.forEach(cfg => {
+      if (cfg.defaultOn === false) {
+        if (cfg.id === 'roads') {
+          gConnections.selectAll('.road-line').style('display', 'none');
+        } else {
+          gNodes.selectAll(`.node-group[data-layer="${cfg.id}"]`).style('display', 'none');
+        }
+      }
+    });
   })
   .catch(err => {
     document.getElementById('map-loading').innerHTML = `<p style="color:#dc2626;">Failed to load district data. Check your connection.</p>`;
@@ -2402,6 +2433,16 @@ window.addEventListener('resize', () => {
     renderRoads();
     renderNodes();
     buildRegionsPanel();
+    // Re-apply defaultOn state
+    LAYER_CONFIG.forEach(cfg => {
+      if (cfg.defaultOn === false) {
+        if (cfg.id === 'roads') {
+          gConnections.selectAll('.road-line').style('display', 'none');
+        } else {
+          gNodes.selectAll(`.node-group[data-layer="${cfg.id}"]`).style('display', 'none');
+        }
+      }
+    });
   }
 });
 
